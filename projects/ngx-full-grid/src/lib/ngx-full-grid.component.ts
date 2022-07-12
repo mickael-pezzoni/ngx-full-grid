@@ -175,7 +175,17 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     }
     const sortIndex = this.state.columns
       .map((column) => column.sort?.index ?? 0)
-      .sort((a, b) => a + b)[0];
+      .sort()
+      .reverse()[0];
+
+    console.log(
+      this.state.columns
+        .map((column) => column.sort?.index ?? 0)
+        .sort()
+        .reverse(),
+      sortIndex
+    );
+
     this.state = {
       ...this.state,
       columns: [
@@ -183,7 +193,13 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
           ...column,
           sort:
             column.property === propertyColumn
-              ? { ...sort, index: sortIndex + 1 }
+              ? {
+                  ...sort,
+                  index:
+                    sortIndex < this.displayedColumns.length
+                      ? sortIndex + 1
+                      : sortIndex,
+                }
               : column.sort,
         })),
       ],

@@ -1,22 +1,36 @@
-<table mat-table matSort [dataSource]="values | filter: filter: backendFilter: filterMode" class="mat-elevation-z8">
-
-  <ng-container *ngFor="let column of state.columns" [matColumnDef]="column.uuid">
+<table
+  mat-table
+  matSort
+  [dataSource]="values | filter: filter:backendFilter:filterMode"
+  class="mat-elevation-z8"
+>
+  <ng-container
+    *ngFor="let column of state.columns; let i = index"
+    [matColumnDef]="column.uuid"
+  >
     <mat-header-cell mat-header-cell *matHeaderCellDef>
-
-      <lib-grid-column [column]="column" [enableFilter]="enableFilter" (filterChange)="onFilterChange($event, column)"
-        [enableSorting]="enableSorting" (sortChange)="onSortChange($event, column.property)">
+      <lib-grid-column
+        [column]="column"
+        [enableFilter]="enableFilter"
+        (filterChange)="onFilterChange($event, column)"
+        [enableSorting]="enableSorting"
+        (sortChange)="onSortChange($event, column.property)"
+      >
       </lib-grid-column>
-
     </mat-header-cell>
-    <mat-cell mat-cell *matCellDef="let element"> {{ getValueFromProperty(element, column.property) }} </mat-cell>
+    <mat-cell mat-cell *matCellDef="let element">
+      {{ getValueFromProperty(element, column.property) }}
+    </mat-cell>
   </ng-container>
-
-
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
   <!-- <tr (click)="onRowSelect(row)" mat-row *matRowDef="let row; columns: displayedColumns;"></tr> -->
-  <mat-row (click)="onRowSelect(row)" [class]="isSelect(row) ? selectedClass: ''" matRipple
-    *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  <mat-row
+    (click)="onRowSelect(row)"
+    [class]="isSelect(row) ? selectedClass : ''"
+    matRipple
+    *matRowDef="let row; columns: displayedColumns"
+  ></mat-row>
 
   <!-- Row shown when there is no matching data. -->
   <!-- <tr class="mat-row" *matNoDataRow>
