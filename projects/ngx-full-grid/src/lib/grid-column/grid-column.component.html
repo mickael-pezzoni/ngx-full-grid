@@ -1,0 +1,23 @@
+<div class="header">
+  <button *ngIf="enableSorting; else headerTemplate;" mat-button (click)="onSortChange()">
+    {{ column.name }}
+    <ng-container *ngIf="column.sort !== undefined">
+      {{ column.sort.index }}
+      <mat-icon *ngIf="isSortDesc">south</mat-icon>
+      <mat-icon *ngIf="isSortAsc">north</mat-icon>
+
+    </ng-container>
+
+  </button>
+  <ng-template #headerTemplate>
+    {{ column.name }}
+  </ng-template>
+
+  <ng-container *ngIf="enableFilter">
+    <mat-form-field *ngIf="enableFilter" class="search-field">
+      <input (input)="onFilterChange($event)" type="text" matInput [placeholder]="column.name">
+    </mat-form-field>
+  </ng-container>
+
+
+</div>

@@ -11,6 +11,16 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
+    "paths": {
+      "ngx-full-grid": [
+        "dist/ngx-full-grid/ngx-full-grid",
+        "dist/ngx-full-grid"
+      ],
+      "ngx-full-grrid": [
+        "dist/ngx-full-grrid/ngx-full-grrid",
+        "dist/ngx-full-grrid"
+      ]
+    },
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
