@@ -12,6 +12,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { GridColumnComponent } from './grid-column/grid-column.component';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @NgModule({
   declarations: [NgxFullGridComponent, FilterPipe, GridColumnComponent],
@@ -26,6 +27,7 @@ import { GridColumnComponent } from './grid-column/grid-column.component';
     MatIconModule,
     MatButtonModule,
     BrowserAnimationsModule,
+    MatBadgeModule,
   ],
   exports: [NgxFullGridComponent],
 })

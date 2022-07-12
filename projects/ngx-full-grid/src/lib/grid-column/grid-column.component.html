@@ -1,10 +1,9 @@
 <div class="header">
-  <button *ngIf="enableSorting; else headerTemplate;" mat-button (click)="onSortChange()">
+  <button class="sorting-button" *ngIf="enableSorting; else headerTemplate;" mat-button (click)="onSortChange()">
     {{ column.name }}
     <ng-container *ngIf="column.sort !== undefined">
-      {{ column.sort.index }}
-      <mat-icon *ngIf="isSortDesc">south</mat-icon>
-      <mat-icon *ngIf="isSortAsc">north</mat-icon>
+      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortDesc">expand_more</mat-icon>
+      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortAsc">expand_less</mat-icon>
 
     </ng-container>
 
