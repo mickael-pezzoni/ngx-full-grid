@@ -1,6 +1,7 @@
 <lib-ngx-full-grid [values]="data" [enableSorting]="true" (selectChange)="onSelectItem($event)"
-  [selectedItems]="selectedItems" [backendFilter]="true" [enableFilter]="true" [checkSelectFnt]="isSelect"
-  [state]="state" (stateChange)="onStateChange($event)" (filterChange)="onFilterChange($event)">
+  [selectedItems]="selectedItems" [backendFilter]="false" [filterMode]="'startWith'" [enableFilter]="true"
+  [checkSelectFnt]="isSelect" [state]="state" (stateChange)="onStateChange($event)"
+  (filterChange)="onFilterChange($event)">
 </lib-ngx-full-grid>
 
 <ul>

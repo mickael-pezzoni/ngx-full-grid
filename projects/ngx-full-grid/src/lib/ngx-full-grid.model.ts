@@ -24,6 +24,9 @@ export type ObjectFromKeyOf<T> = {
 
 export type FilterEntity<T> = ObjectFromKeyOf<T>;
 
+export const FILTER_MODE = ['contains', 'equals', 'startWith'] as const;
+export type FilterMode = typeof FILTER_MODE[number];
+
 export interface ColumnIdentifier<T extends object> extends Column<T> {
   uuid: string;
 }

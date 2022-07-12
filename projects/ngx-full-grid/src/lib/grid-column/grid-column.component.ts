@@ -34,12 +34,6 @@ export class GridColumnComponent<T extends object> implements OnInit {
   }
 
   onSortChange(): void {
-    // this.column = {
-    //   ...this.column,
-    //   sort: {
-    //     direction: this.isSortAsc ? SortDirection.DESC : SortDirection.ASC,
-    //   },
-    // };
     const direction = this.isSortAsc ? SortDirection.DESC : SortDirection.ASC;
 
     this.sortChange.emit({

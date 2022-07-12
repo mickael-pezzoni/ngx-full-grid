@@ -8,6 +8,7 @@ import {
   GridState,
   GridSort,
   GridStateApplied,
+  FilterMode,
 } from './ngx-full-grid.model';
 import {
   ChangeDetectionStrategy,
@@ -44,6 +45,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() enableSorting = false;
   @Input() selectedClass = 'item-selected';
   @Input() backendFilter = false;
+  @Input() filterMode?: FilterMode;
   @Input() checkSelectFnt!: (currentItem: T, selectedItem: T) => boolean;
   @Input() selectedItems: T[] = [];
   @Input()

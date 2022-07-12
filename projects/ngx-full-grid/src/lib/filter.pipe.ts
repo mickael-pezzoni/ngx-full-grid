@@ -1,14 +1,27 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DotNestedKeys, ObjectFromKeyOf } from './ngx-full-grid.model';
+import {
+  DotNestedKeys,
+  FilterMode,
+  FILTER_MODE,
+  ObjectFromKeyOf,
+} from './ngx-full-grid.model';
 
 @Pipe({
   name: 'filter',
 })
 export class FilterPipe implements PipeTransform {
+  private readonly functionByFilterMode: {
+    [key in FilterMode]: (value: string, term: string) => boolean;
+  } = {
+    contains: (value: string, term: string): boolean => value.includes(term),
+    equals: (value: string, term: string): boolean => value === term,
+    startWith: (value: string, term: string): boolean => value.startsWith(term),
+  };
   transform<T>(
     values: T[],
     filter: ObjectFromKeyOf<T>,
-    backendFilter = false
+    backendFilter = false,
+    searchMode: FilterMode = 'equals'
   ): T[] {
     if (backendFilter) {
       return values;
@@ -23,7 +36,8 @@ export class FilterPipe implements PipeTransform {
                   this.filterByObjectProperties(
                     item,
                     key as DotNestedKeys<T>,
-                    value
+                    value,
+                    searchMode
                   )
                 ).length > 0
             );
@@ -36,19 +50,26 @@ export class FilterPipe implements PipeTransform {
   private filterByObjectProperties<T>(
     item: T,
     key: DotNestedKeys<T>,
-    filterValue: unknown
+    filterValue: unknown,
+    filterMode: FilterMode
   ): boolean {
     const keys = (key as string).split('.');
     const valueForKey = Object.entries(item).find(([key, value]) =>
       keys.includes(key)
     )?.[1];
 
-    return typeof valueForKey === 'object'
-      ? this.filterByObjectProperties(
-          valueForKey,
-          keys.join('.') as DotNestedKeys<T>,
-          filterValue
-        )
-      : String(valueForKey).toLowerCase() === String(filterValue).toLowerCase();
+    if (typeof valueForKey === 'object') {
+      return this.filterByObjectProperties(
+        valueForKey,
+        keys.join('.') as DotNestedKeys<T>,
+        filterValue,
+        filterMode
+      );
+    }
+
+    return this.functionByFilterMode[filterMode](
+      String(valueForKey).toLowerCase(),
+      String(filterValue).toLowerCase()
+    );
   }
 }
