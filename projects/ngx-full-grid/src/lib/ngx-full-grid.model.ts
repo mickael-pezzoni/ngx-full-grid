@@ -16,6 +16,7 @@ export interface Column<T extends object> {
   name: string;
   property: DotNestedKeys<T>;
   sort?: GridSort<T>;
+  index?: number;
   visible: boolean;
 }
 export type ObjectFromKeyOf<T> = {

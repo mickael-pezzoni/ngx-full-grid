@@ -5,11 +5,12 @@
   class="mat-elevation-z8"
 >
   <ng-container
-    *ngFor="let column of state.columns; let i = index"
+    *ngFor="let column of state.columns"
     [matColumnDef]="column.uuid"
   >
     <mat-header-cell mat-header-cell *matHeaderCellDef>
       <lib-grid-column
+        [id]="column.uuid"
         [column]="column"
         [enableFilter]="enableFilter"
         (filterChange)="onFilterChange($event, column)"
@@ -24,7 +25,6 @@
   </ng-container>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <!-- <tr (click)="onRowSelect(row)" mat-row *matRowDef="let row; columns: displayedColumns;"></tr> -->
   <mat-row
     (click)="onRowSelect(row)"
     [class]="isSelect(row) ? selectedClass : ''"

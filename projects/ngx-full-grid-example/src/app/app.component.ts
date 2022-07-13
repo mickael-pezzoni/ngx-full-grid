@@ -52,16 +52,19 @@ export class AppComponent {
         property: 'position',
         visible: true,
         sort: { direction: SortDirection.ASC, index: 1 },
+        index: 2,
       },
       {
         name: 'weight',
         property: 'data.weight',
         visible: true,
+        index: 1,
       },
       {
         name: 'symbol',
         property: 'symbol',
         visible: true,
+        index: 3,
       },
     ],
   };

@@ -52,7 +52,13 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   set state(state: GridState<T>) {
     this._state = {
       ...state,
-      columns: state.columns.map((column) => ({ ...column, uuid: v4() })),
+      columns: state.columns
+        .map((column, index) => ({
+          ...column,
+          uuid: v4(),
+          index: column.index ?? index,
+        }))
+        .sort((a, b) => a.index - b.index),
     };
   }
   get state(): GridStateApplied<T> {
@@ -89,14 +95,14 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       : value;
   }
 
-  @HostListener('document:keydown', ['$event']) private onCtrlPressed(
+  @HostListener('document:keydown', ['$event']) private onKeyPressed(
     event: KeyboardEvent
   ): void {
     this.ctrlIsPressed = event.key === 'Control';
     this.shiftIsPressed = event.key === 'Shift';
   }
 
-  @HostListener('document:keyup', ['$event']) private onCtrlUnpressed(
+  @HostListener('document:keyup', ['$event']) private onKeyUnpressed(
     event: KeyboardEvent
   ): void {
     this.ctrlIsPressed = event.key === 'Control' ? false : this.ctrlIsPressed;
@@ -178,14 +184,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       .sort()
       .reverse()[0];
 
-    console.log(
-      this.state.columns
-        .map((column) => column.sort?.index ?? 0)
-        .sort()
-        .reverse(),
-      sortIndex
-    );
-
     this.state = {
       ...this.state,
       columns: [
@@ -206,7 +204,4 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     };
     this.stateChange.emit(this._state);
   }
-  // getSortByColumn(propertyColumn: DotNestedKeys<T>): GridSort<T> | undefined {
-  //   return this.state.sorts.find((sort) => sort.column === propertyColumn);
-  // }
 }
