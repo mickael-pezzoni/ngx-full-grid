@@ -14,16 +14,10 @@ export class GridColumnComponent<T extends object> implements OnInit {
   @Input() column!: ColumnIdentifier<T>;
   @Input() enableSorting = false;
   @Input() enableFilter = false;
-  @Output() filterChange = new EventEmitter<string>();
   @Output() sortChange = new EventEmitter<GridSort<T>>();
   constructor() {}
 
   ngOnInit(): void {}
-
-  onFilterChange(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.filterChange.emit(value);
-  }
 
   get isSortDesc(): boolean {
     return this.column.sort?.direction === SortDirection.DESC ?? false;

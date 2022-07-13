@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatRippleModule } from '@angular/material/core';
-import { FilterPipe } from './filter.pipe';
+import { FilterPipe } from './grid-filter/filter.pipe';
 import { MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,9 +15,10 @@ import { GridColumnComponent } from './grid-column/grid-column.component';
 import { MatBadgeModule } from '@angular/material/badge';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ResizeColumnDirective } from './resize-column.directive';
+import { GridFilterComponent } from './grid-filter/grid-filter.component';
 
 @NgModule({
-  declarations: [NgxFullGridComponent, FilterPipe, GridColumnComponent, ResizeColumnDirective],
+  declarations: [NgxFullGridComponent, FilterPipe, GridColumnComponent, ResizeColumnDirective, GridFilterComponent],
   imports: [
     MatTableModule,
     MatFormFieldModule,

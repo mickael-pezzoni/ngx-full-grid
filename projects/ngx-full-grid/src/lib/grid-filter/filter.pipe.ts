@@ -4,7 +4,7 @@ import {
   FilterMode,
   FILTER_MODE,
   ObjectFromKeyOf,
-} from './ngx-full-grid.model';
+} from '../ngx-full-grid.model';
 
 @Pipe({
   name: 'filter',
