@@ -13,11 +13,13 @@ import {
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   EventEmitter,
   HostListener,
   Input,
   OnInit,
   Output,
+  ViewChild,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { v4 } from 'uuid';
@@ -30,51 +32,21 @@ import {
 @Component({
   selector: 'lib-ngx-full-grid',
   templateUrl: './ngx-full-grid.component.html',
-  styles: [
-    `
-      :host {
-        table {
-          width: 100%;
-
-          .item-selected {
-            background-color: red;
-          }
-        }
-        .example-custom-placeholder {
-          background: #ccc;
-          border: dotted 3px #999;
-          min-height: 60px;
-          transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-        }
-
-        .cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
-          transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-        }
-
-        .cdk-drag-preview {
-          box-sizing: border-box;
-          border-radius: 4px;
-          box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-            0 8px 10px 1px rgba(0, 0, 0, 0.14),
-            0 3px 14px 2px rgba(0, 0, 0, 0.12);
-        }
-
-        .cdk-drag-animating {
-          transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-        }
-      }
-    `,
-  ],
+  styleUrls: ['./ngx-full-grid.component.scss'],
 })
 export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() values!: T[];
   @Input() enableFilter = false;
   @Input() enableSorting = false;
+  @Input() enableReorder = false;
+  @Input() enableResize = false;
   @Input() selectedClass = 'item-selected';
   @Input() backendFilter = false;
   @Input() filterMode?: FilterMode;
   @Input() checkSelectFnt!: (currentItem: T, selectedItem: T) => boolean;
   @Input() selectedItems: T[] = [];
+  @ViewChild('matTable', { static: true, read: ElementRef })
+  readonly matTableElement!: ElementRef<HTMLElement>;
   @Input()
   set state(state: GridState<T>) {
     this._state = {
@@ -101,6 +73,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private _state!: GridStateApplied<T>;
   private ctrlIsPressed = false;
   private shiftIsPressed = false;
+  resize = false;
 
   constructor() {}
 
@@ -200,6 +173,16 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
         ...this.state.columns.map((column) => ({ ...column, sort: undefined })),
       ],
     };
+  }
+
+  onResize(): void {
+    this.resize = true;
+    console.log('resize ', this.enableReorder && this.resize);
+  }
+
+  onStopResize(): void {
+    this.resize = false;
+    console.log('resize stop ', this.enableReorder && this.resize);
   }
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {

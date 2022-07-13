@@ -14,9 +14,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { GridColumnComponent } from './grid-column/grid-column.component';
 import { MatBadgeModule } from '@angular/material/badge';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ResizeColumnDirective } from './resize-column.directive';
 
 @NgModule({
-  declarations: [NgxFullGridComponent, FilterPipe, GridColumnComponent],
+  declarations: [NgxFullGridComponent, FilterPipe, GridColumnComponent, ResizeColumnDirective],
   imports: [
     MatTableModule,
     MatFormFieldModule,
