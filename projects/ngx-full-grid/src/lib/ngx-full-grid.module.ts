@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { GridColumnComponent } from './grid-column/grid-column.component';
 import { MatBadgeModule } from '@angular/material/badge';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [NgxFullGridComponent, FilterPipe, GridColumnComponent],
@@ -26,6 +27,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     MatSortModule,
     MatIconModule,
     MatButtonModule,
+    DragDropModule,
     BrowserAnimationsModule,
     MatBadgeModule,
   ],

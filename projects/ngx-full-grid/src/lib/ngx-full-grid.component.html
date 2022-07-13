@@ -1,6 +1,10 @@
 <table
   mat-table
   matSort
+  [cdkDropListData]="state.columns"
+  (cdkDropListDropped)="onDropColumn($event)"
+  cdkDropListOrientation="horizontal"
+  cdkDropList
   [dataSource]="values | filter: filter:backendFilter:filterMode"
   class="mat-elevation-z8"
 >
@@ -8,8 +12,15 @@
     *ngFor="let column of state.columns"
     [matColumnDef]="column.uuid"
   >
-    <mat-header-cell mat-header-cell *matHeaderCellDef>
+    <mat-header-cell
+      mat-header-cell
+      cdkDrag
+      *matHeaderCellDef
+      [cdkDragData]="column"
+    >
+      <!-- <div class="example-custom-placeholder" *cdkDragPlaceholder></div> -->
       <lib-grid-column
+        class="column"
         [id]="column.uuid"
         [column]="column"
         [enableFilter]="enableFilter"

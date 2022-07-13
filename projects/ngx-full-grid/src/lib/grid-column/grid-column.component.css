@@ -1,5 +1,15 @@
 :host {
+  border-bottom: solid 1px #ccc;
+  color: rgba(0, 0, 0, 0.87);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  cursor: move;
   width: 100%;
+  background: white;
+  font-size: 14px;
 }
 
 .sorting-button {

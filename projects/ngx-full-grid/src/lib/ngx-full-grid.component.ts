@@ -21,6 +21,11 @@ import {
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { v4 } from 'uuid';
+import {
+  CdkDragDrop,
+  CdkDragStart,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'lib-ngx-full-grid',
@@ -34,6 +39,28 @@ import { v4 } from 'uuid';
           .item-selected {
             background-color: red;
           }
+        }
+        .example-custom-placeholder {
+          background: #ccc;
+          border: dotted 3px #999;
+          min-height: 60px;
+          transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+        }
+
+        .cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+          transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+        }
+
+        .cdk-drag-preview {
+          box-sizing: border-box;
+          border-radius: 4px;
+          box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+            0 8px 10px 1px rgba(0, 0, 0, 0.14),
+            0 3px 14px 2px rgba(0, 0, 0, 0.12);
+        }
+
+        .cdk-drag-animating {
+          transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
         }
       }
     `,
@@ -175,6 +202,31 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     };
   }
 
+  onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
+    const dropedColumn = event.item.data;
+    const columnTarget = this.state.columns[event.currentIndex];
+
+    this._state = {
+      ...this._state,
+      columns: [
+        ...this.state.columns.map((column, index) => {
+          if (index === event.currentIndex) {
+            return { ...dropedColumn, index: event.currentIndex + 1 };
+          } else if (index === event.previousIndex) {
+            return { ...columnTarget, index: event.previousIndex + 1 };
+          }
+          return column;
+        }),
+      ],
+    };
+
+    this.emitState();
+  }
+
+  private emitState(): void {
+    this.stateChange.emit(this.state);
+  }
+
   onSortChange(sort: GridSort<T>, propertyColumn: DotNestedKeys<T>): void {
     if (!this.ctrlIsPressed) {
       this.cleanSort();
@@ -202,6 +254,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
         })),
       ],
     };
-    this.stateChange.emit(this._state);
+    this.emitState();
   }
 }

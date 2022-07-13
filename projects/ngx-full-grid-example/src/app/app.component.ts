@@ -100,6 +100,7 @@ export class AppComponent {
         })),
       ],
     };
+    console.log(this.state);
   }
 
   onFilterChange(event: FilterEntity<PeriodicElement>): void {
