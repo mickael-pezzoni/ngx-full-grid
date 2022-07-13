@@ -1,6 +1,6 @@
 <table mat-table #matTable matSort [cdkDropListData]="state.columns" (cdkDropListDropped)="onDropColumn($event)"
   cdkDropListOrientation="horizontal" cdkDropList [dataSource]="values | filter: filter:backendFilter:filterMode"
-  class="mat-elevation-z8">
+  class="mat-elevation-z8 noselect">
   <ng-container *ngFor="let column of state.columns; let i = index" [matColumnDef]="column.uuid">
     <th mat-header-cell *matHeaderCellDef libResizeColumn [index]="i" [matTable]="matTableElement.nativeElement"
       [resizeColumn]="enableResize" (resizeChange)="onResize()" (resizeEnd)="onStopResize()">
