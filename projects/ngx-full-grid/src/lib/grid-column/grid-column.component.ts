@@ -12,6 +12,7 @@ import {
   Input,
   OnInit,
   Output,
+  TemplateRef,
 } from '@angular/core';
 
 @Component({
@@ -23,6 +24,8 @@ export class GridColumnComponent<T extends object> implements OnInit {
   @Input() column!: ColumnIdentifier<T>;
   @Input() enableSorting = false;
   @Input() enableFilter = false;
+
+  @Input() template?: TemplateRef<unknown>;
 
   @Output() sortChange = new EventEmitter<GridSort<T>>();
   @Output() resizeStart = new EventEmitter<void>();

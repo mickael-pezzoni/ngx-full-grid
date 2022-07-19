@@ -11,6 +11,7 @@ import {
   FilterMode,
 } from './ngx-full-grid.model';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -19,6 +20,7 @@ import {
   Input,
   OnInit,
   Output,
+  TemplateRef,
   ViewChild,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
@@ -47,6 +49,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() selectedItems: T[] = [];
   @ViewChild('matTable', { static: true, read: ElementRef })
   readonly matTableElement!: ElementRef<HTMLElement>;
+  @Input() columnTemplate?: TemplateRef<unknown>;
   @Input()
   set state(state: GridState<T>) {
     this._state = {
@@ -83,6 +86,10 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     return this.state.columns
       .filter((column) => column.visible)
       .map((column) => column.uuid);
+  }
+
+  ngAfterViewInit(): void {
+    console.log(this.columnTemplate);
   }
 
   getValueFromProperty(item: object, property: DotNestedKeys<T>): unknown {
