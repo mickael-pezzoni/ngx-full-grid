@@ -55,7 +55,7 @@ export class ResizeColumnDirective<T> {
 
   onMouseDown = (event: MouseEvent) => {
     this.resizing = true;
-    this.startX = event.pageX;
+    this.startX = event.clientX;
     this.startWidth = this.elementRef.nativeElement.offsetWidth;
     this.resizeStart.emit();
   };
@@ -74,7 +74,7 @@ export class ResizeColumnDirective<T> {
       this.renderer.addClass(this.table, 'resizing');
 
       // Calculate width of column
-      const width = this.startWidth + (event.pageX - this.startX - offset);
+      const width = this.startWidth + (event.clientX - this.startX - offset);
 
       // Set table header width
       // this.renderer.setStyle(
@@ -82,6 +82,8 @@ export class ResizeColumnDirective<T> {
       //   'width',
       //   `${width}px`
       // );
+      console.log(width);
+
       this.width = width;
       // Set table cells width
 

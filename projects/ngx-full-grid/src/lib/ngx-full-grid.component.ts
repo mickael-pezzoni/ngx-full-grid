@@ -181,12 +181,13 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   onStopResize(width: number, resizedColumn: ColumnIdentifier<T>): void {
     this.resize = false;
-    console.log(width);
+
+    console.log(width, resizedColumn);
 
     this._state = {
       ...this.state,
       columns: this.state.columns.map((column) => {
-        if (column.uuid === column.uuid) {
+        if (column.property === resizedColumn.property) {
           return {
             ...column,
             width: width,
@@ -199,7 +200,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   }
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
-    const dropedColumn = event.item.data as ColumnIdentifier<T>;
+    const droppedColumn = event.item.data as ColumnIdentifier<T>;
     const columnTarget = this.state.columns[event.currentIndex];
     this._state = {
       ...this._state,
@@ -207,7 +208,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
         ...this.state.columns.map((column, index) => {
           if (index === event.currentIndex) {
             return {
-              ...dropedColumn,
+              ...droppedColumn,
               index: event.currentIndex + 1,
             };
           } else if (index === event.previousIndex) {
