@@ -96,10 +96,13 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   getValueFromProperty(item: object, property: DotNestedKeys<T>): unknown {
     const keys = (property as string).split('.');
 
-    const value = Object.entries(item).find(([key]) => keys.includes(key))?.[1];
+    const value = Object.entries(item).find(([key]) => keys[0] === key)?.[1];
 
-    return typeof value === 'object'
-      ? this.getValueFromProperty(value, keys.join('.') as DotNestedKeys<T>)
+    return typeof value === 'object' && value !== null && value !== undefined
+      ? this.getValueFromProperty(
+          value,
+          keys.slice(1).join('.') as DotNestedKeys<T>
+        )
       : value;
   }
 

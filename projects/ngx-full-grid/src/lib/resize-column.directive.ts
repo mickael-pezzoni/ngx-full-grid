@@ -82,7 +82,6 @@ export class ResizeColumnDirective<T> {
       //   'width',
       //   `${width}px`
       // );
-      console.log(width);
 
       this.width = width;
       // Set table cells width
