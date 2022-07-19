@@ -8,18 +8,39 @@
   box-sizing: border-box;
   cursor: move;
   width: 100%;
+  position: relative;
   background: white;
   font-size: 14px;
 }
+.resizable-control {
+  height: 100%;
+  position: absolute;
+  width: 4px;
+  transition-property: opacity;
+  transition-duration: 0.5s;
 
+  opacity: 0;
+  z-index: 2;
+  left: 0;
+  background-color: black;
+  &:hover,
+  &:active {
+    opacity: 1;
+    cursor: ew-resize;
+  }
+}
 .sorting-button {
   height: 60px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  min-width: 0px;
+
 }
 .header {
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 60px;
   justify-content: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
   text-align: center;
 }

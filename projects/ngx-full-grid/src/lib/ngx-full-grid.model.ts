@@ -18,6 +18,7 @@ export interface Column<T extends object> {
   sort?: GridSort<T>;
   index?: number;
   visible: boolean;
+  width?: number;
 }
 export type ObjectFromKeyOf<T> = {
   [key in keyof T]?: T[key];

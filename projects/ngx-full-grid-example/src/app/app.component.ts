@@ -53,12 +53,14 @@ export class AppComponent {
         visible: true,
         sort: { direction: SortDirection.ASC, index: 1 },
         index: 2,
+        width: 200,
       },
       {
         name: 'weight',
         property: 'data.weight',
         visible: true,
         index: 1,
+        width: 400,
       },
       {
         name: 'symbol',

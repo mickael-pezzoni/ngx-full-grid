@@ -1,21 +1,5 @@
 :host {
   .mat-table {
-    .resizable-control {
-      height: 100%;
-      position: absolute;
-      width: 4px;
-      transition-property: opacity;
-      transition-duration: 0.5s;
-      opacity: 0;
-      z-index: 2;
-      left: 0;
-      background-color: black;
-      &:hover,
-      &:active {
-        opacity: 1;
-        cursor: ew-resize;
-      }
-    }
     width: 100%;
     &.resizing {
       -moz-user-select: none;
@@ -30,55 +14,37 @@
         text-overflow: ellipsis;
       }
     }
-    .mat-cell,
     .mat-header-cell {
       position: relative;
-
-      border-right: 1px solid rgba(0, 0, 0, 0.12);
-      &:not(:nth-child(1)) {
-        padding: 0 10px;
+      &:not(:last-child) {
+        .resize-holder {
+          cursor: col-resize;
+          width: 20px;
+          height: 100%;
+          position: absolute;
+          right: -10px;
+          top: 0;
+          z-index: 1;
+        }
       }
     }
-
-    .item-selected {
-      background-color: red;
+    .mat-cell,
+    .mat-header-cell {
+      border-right: 1px solid rgba(0, 0, 0, 0.12);
+      padding: 0 10px;
     }
   }
-  .example-custom-placeholder {
-    background: #ccc;
-    border: dotted 3px #999;
-    min-height: 60px;
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-  }
-
-  .cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-  }
-
-  .cdk-drag-preview {
-    box-sizing: border-box;
-    border-radius: 4px;
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
-  }
-
-  .cdk-drag-animating {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-  }
-  .mat-cell,
-  .mat-header-cell {
-    // width: 20px;
-
-    border-right: 1px solid rgba(0, 0, 0, 0.12);
-    padding: 0 10px;
+  .item-selected {
+    background-color: red;
   }
 }
+
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }

@@ -3,19 +3,33 @@ import {
   GridSort,
   SortDirection,
 } from './../ngx-full-grid.model';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostBinding,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 
 @Component({
   selector: 'lib-grid-column',
   templateUrl: './grid-column.component.html',
-  styleUrls: ['./grid-column.component.css'],
+  styleUrls: ['./grid-column.component.scss'],
 })
 export class GridColumnComponent<T extends object> implements OnInit {
   @Input() column!: ColumnIdentifier<T>;
   @Input() enableSorting = false;
   @Input() enableFilter = false;
+
   @Output() sortChange = new EventEmitter<GridSort<T>>();
-  constructor() {}
+  @Output() resizeStart = new EventEmitter<void>();
+  @Output() resizeEnd = new EventEmitter<void>();
+
+  private sortStatus = [SortDirection.ASC, SortDirection.DESC, undefined];
+  constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
 
   ngOnInit(): void {}
 
@@ -28,11 +42,22 @@ export class GridColumnComponent<T extends object> implements OnInit {
   }
 
   onSortChange(): void {
-    const direction = this.isSortAsc ? SortDirection.DESC : SortDirection.ASC;
+    const currentSortStatusIndex = this.sortStatus.indexOf(
+      this.column.sort?.direction
+    );
+    const newSortStatusIndex =
+      currentSortStatusIndex === this.sortStatus.length - 1
+        ? 0
+        : currentSortStatusIndex + 1;
+    const direction = this.sortStatus[newSortStatusIndex];
 
-    this.sortChange.emit({
-      index: this.column.sort?.index ?? 0,
-      direction,
-    });
+    this.sortChange.emit(
+      direction !== undefined
+        ? {
+            index: this.column.sort?.index ?? 0,
+            direction,
+          }
+        : undefined
+    );
   }
 }

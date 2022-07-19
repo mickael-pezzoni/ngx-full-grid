@@ -15,71 +15,84 @@ import { MatTable } from '@angular/material/table';
 })
 export class ResizeColumnDirective<T> {
   @Input('resizeColumn') resizable!: boolean;
+
+  @Input() index!: number;
+
+  private startX = 0;
+
+  private startWidth = 0;
+
+  @Input() table!: HTMLElement;
+
   @Input()
   @HostBinding('style.width.px')
   width?: number;
-  @Input() index!: number;
-  @Input() matTable!: HTMLElement;
-  private startX = 0;
-  private startWidth = 0;
-  private mouseX = 0;
 
-  private mouseDown = false;
+  @Output() resizeStart = new EventEmitter<void>();
+  @Output() resizeEnd = new EventEmitter<number>();
 
-  @Output() resizeChange = new EventEmitter<void>();
-  @Output() resizeEnd = new EventEmitter<void>();
+  private resizing = false;
 
-  constructor(
-    private renderer: Renderer2,
-    private elelementRef: ElementRef<HTMLElement>
-  ) {
-    const resizableControl = this.renderer.createElement(
-      'div'
-    ) as HTMLDivElement;
-    this.renderer.addClass(resizableControl, 'resizable-control');
-    this.renderer.appendChild(
-      this.elelementRef.nativeElement,
-      resizableControl
-    );
+  constructor(private renderer: Renderer2, private elementRef: ElementRef) {}
 
-    this.renderer.listen(resizableControl, 'mousedown', (event: MouseEvent) =>
-      this.onMouseDown(event)
-    );
+  ngOnInit() {
+    if (this.resizable) {
+      const row = this.renderer.parentNode(this.elementRef.nativeElement);
+      const thead = this.renderer.parentNode(row);
+      this.table = this.renderer.parentNode(thead);
+
+      const resizer = this.renderer.createElement('span');
+      this.renderer.addClass(resizer, 'resize-holder');
+      this.renderer.appendChild(this.elementRef.nativeElement, resizer);
+      this.renderer.listen(resizer, 'mousedown', this.onMouseDown);
+      this.renderer.listen(this.table, 'mousemove', this.onMouseMove);
+
+      this.cellElements.forEach((cell) =>
+        this.renderer.setStyle(cell, 'width', `${this.width}px`)
+      );
+    }
   }
 
-  ngOnInit() {}
-
-  private onMouseDown(event: MouseEvent): void {
+  onMouseDown = (event: MouseEvent) => {
+    this.resizing = true;
     this.startX = event.pageX;
-    this.startWidth = this.elelementRef.nativeElement.offsetWidth;
+    this.startWidth = this.elementRef.nativeElement.offsetWidth;
+    this.resizeStart.emit();
+  };
 
-    // this.startWidth = this.elelementRef.nativeElement.offsetWidth;
-    this.mouseDown = true;
-    this.resizeChange.emit();
-  }
-
-  @HostListener('window:mouseup', ['$event']) private onMouseUp(
-    event: MouseEvent
-  ): void {
-    if (this.mouseDown) {
-      this.mouseDown = false;
-
-      this.resizeEnd.emit();
+  @HostListener('window:mouseup', ['$event']) private onMouseUp(): void {
+    if (this.resizing) {
+      this.resizing = false;
+      this.renderer.removeClass(this.table, 'resizing');
+      this.resizeEnd.emit(this.width);
     }
   }
 
-  @HostListener('window:mousemove', ['$event']) private onMouseMove(
-    event: MouseEvent
-  ): void {
-    this.mouseX = event.clientX;
-    if (this.mouseDown && this.resizable) {
-      const width = this.startWidth - (event.pageX - this.startX - 35);
+  onMouseMove = (event: MouseEvent) => {
+    const offset = 0;
+    if (this.resizing && event.buttons) {
+      this.renderer.addClass(this.table, 'resizing');
+
+      // Calculate width of column
+      const width = this.startWidth + (event.pageX - this.startX - offset);
+
+      // Set table header width
+      // this.renderer.setStyle(
+      //   this.elementRef.nativeElement,
+      //   'width',
+      //   `${width}px`
+      // );
       this.width = width;
+      // Set table cells width
+
+      this.cellElements.forEach((cell) =>
+        this.renderer.setStyle(cell, 'width', `${width}px`)
+      );
     }
-  }
+  };
 
   get cellElements(): Element[] {
-    return Array.from(this.matTable.querySelectorAll('.mat-row')).map((row) =>
+    return Array.from(this.table.querySelectorAll('.mat-row')).map((row) =>
       row.querySelectorAll('.mat-cell').item(this.index)
     );
   }

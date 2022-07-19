@@ -1,5 +1,6 @@
-<div class="header">
-  <button class="sorting-button" *ngIf="enableSorting; else headerTemplate" mat-button (click)="onSortChange()">
+<div class="header" matRipple>
+  <button class="sorting-button" [disableRipple]="true" *ngIf="enableSorting; else headerTemplate" mat-button
+    (click)="onSortChange()">
     {{ column.name }}
     <ng-container *ngIf="column.sort !== undefined">
       <mat-icon [matBadge]="column.sort.index" *ngIf="isSortDesc">expand_more</mat-icon>
@@ -7,6 +8,9 @@
     </ng-container>
   </button>
   <ng-template #headerTemplate>
-    {{ column.name }}
+    <div>
+      <p>{{ column.name }}</p>
+    </div>
   </ng-template>
+  <!-- <div *ngIf="column.index !== 0 && enableResize" (mousedown)="onMouseDown($event)" class="resizable-control"></div> -->
 </div>

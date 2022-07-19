@@ -177,26 +177,44 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   onResize(): void {
     this.resize = true;
-    console.log('resize ', this.enableReorder && this.resize);
   }
 
-  onStopResize(): void {
+  onStopResize(width: number, resizedColumn: ColumnIdentifier<T>): void {
     this.resize = false;
-    console.log('resize stop ', this.enableReorder && this.resize);
+    console.log(width);
+
+    this._state = {
+      ...this.state,
+      columns: this.state.columns.map((column) => {
+        if (column.uuid === column.uuid) {
+          return {
+            ...column,
+            width: width,
+          };
+        }
+        return column;
+      }),
+    };
+    this.emitState();
   }
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
-    const dropedColumn = event.item.data;
+    const dropedColumn = event.item.data as ColumnIdentifier<T>;
     const columnTarget = this.state.columns[event.currentIndex];
-
     this._state = {
       ...this._state,
       columns: [
         ...this.state.columns.map((column, index) => {
           if (index === event.currentIndex) {
-            return { ...dropedColumn, index: event.currentIndex + 1 };
+            return {
+              ...dropedColumn,
+              index: event.currentIndex + 1,
+            };
           } else if (index === event.previousIndex) {
-            return { ...columnTarget, index: event.previousIndex + 1 };
+            return {
+              ...columnTarget,
+              index: event.previousIndex + 1,
+            };
           }
           return column;
         }),
@@ -210,33 +228,89 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     this.stateChange.emit(this.state);
   }
 
-  onSortChange(sort: GridSort<T>, propertyColumn: DotNestedKeys<T>): void {
-    if (!this.ctrlIsPressed) {
-      this.cleanSort();
-    }
+  private calculSortIndex(
+    sort: GridSort<T>,
+    column: ColumnIdentifier<T>
+  ): number {
     const sortIndex = this.state.columns
       .map((column) => column.sort?.index ?? 0)
       .sort()
       .reverse()[0];
 
+    if (sort.index === column.sort?.index) {
+      return sort.index;
+    }
+
+    if (sortIndex < this.displayedColumns.length) {
+      return sortIndex + 1;
+    }
+
+    return sortIndex;
+  }
+
+  onSortChange(
+    sort: GridSort<T> | undefined,
+    sortedColumn: ColumnIdentifier<T>
+  ): void {
+    if (!this.ctrlIsPressed) {
+      this.cleanSort();
+    }
+    if (sort !== undefined) {
+      const newIndex = this.calculSortIndex(sort, sortedColumn);
+      this.updateSortColum(sortedColumn, { ...sort, index: newIndex });
+    }
+
+    if (sort === undefined) {
+      const oldIndex = sortedColumn.sort?.index ?? 0;
+      const columnsHigherSortIndex = this.state.columns.filter(
+        (column) => column.sort !== undefined && column.sort.index > oldIndex
+      );
+      const remainingColumns = this.state.columns.filter(
+        (column) =>
+          !columnsHigherSortIndex.some((colSup) => column.uuid === colSup.uuid)
+      );
+
+      this._state = {
+        ...this.state,
+        columns: [
+          ...remainingColumns,
+          ...columnsHigherSortIndex.map((column) => ({
+            ...column,
+            sort:
+              column.sort !== undefined
+                ? {
+                    ...column.sort,
+                    index: column.sort.index - 1,
+                  }
+                : undefined,
+          })),
+        ],
+      };
+
+      this.updateSortColum(sortedColumn, undefined);
+    }
+
+    this.emitState();
+  }
+
+  private updateSortColum(
+    sortedColumn: ColumnIdentifier<T>,
+    sort: GridSort<T> | undefined
+  ): void {
     this.state = {
       ...this.state,
-      columns: [
-        ...this.state.columns.map((column) => ({
-          ...column,
-          sort:
-            column.property === propertyColumn
-              ? {
-                  ...sort,
-                  index:
-                    sortIndex < this.displayedColumns.length
-                      ? sortIndex + 1
-                      : sortIndex,
-                }
-              : column.sort,
-        })),
-      ],
+      columns: this.state.columns.map((column) => {
+        if (!column.visible) {
+          return column;
+        }
+        if (sortedColumn.property === column.property) {
+          return {
+            ...column,
+            sort: sort,
+          };
+        }
+        return column;
+      }),
     };
-    this.emitState();
   }
 }
