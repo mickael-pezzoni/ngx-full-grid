@@ -15,7 +15,17 @@
       </lib-grid-filter>
     </th>
     <td mat-cell *matCellDef="let element">
-      {{ getValueFromProperty(element, column.property) }}
+      <ng-container *ngIf="cellTemplate !== undefined; else originalCellTemplate">
+        <ng-container
+          *ngTemplateOutlet="cellTemplate; context: {item: element, value: getValueFromProperty(element, column.property)}">
+
+        </ng-container>
+
+      </ng-container>
+      <ng-template #originalCellTemplate>
+        {{ getValueFromProperty(element, column.property) }}
+      </ng-template>
+
     </td>
   </ng-container>
 

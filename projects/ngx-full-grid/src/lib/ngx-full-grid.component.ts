@@ -50,6 +50,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @ViewChild('matTable', { static: true, read: ElementRef })
   readonly matTableElement!: ElementRef<HTMLElement>;
   @Input() columnTemplate?: TemplateRef<unknown>;
+  @Input() cellTemplate?: TemplateRef<unknown>;
   @Input()
   set state(state: GridState<T>) {
     this._state = {

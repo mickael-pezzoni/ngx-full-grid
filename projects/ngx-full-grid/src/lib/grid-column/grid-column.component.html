@@ -1,10 +1,10 @@
 <div class="header" matRipple>
   <button class="sorting-button" [disableRipple]="true" *ngIf="enableSorting; else headerTemplate" mat-button
     (click)="onSortChange()">
-    <ng-container *ngIf="template !== undefined; else columnTemplate">
+    <ng-container *ngIf="template !== undefined; else originalColumnTemplate">
       <ng-container *ngTemplateOutlet="template;context: {column: column}"></ng-container>
     </ng-container>
-    <ng-template #columnTemplate>
+    <ng-template #originalColumnTemplate>
       {{ column.name }}
     </ng-template>
 
