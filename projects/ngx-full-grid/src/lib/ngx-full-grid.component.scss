@@ -14,6 +14,11 @@
         text-overflow: ellipsis;
       }
     }
+    ::ng-deep thead {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
     .mat-header-cell {
       position: relative;
       &:not(:last-child) {

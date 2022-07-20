@@ -1,10 +1,12 @@
-<lib-ngx-full-grid [values]="data" [enableSorting]="true" (selectChange)="onSelectItem($event)"
-  [selectedItems]="selectedItems" [backendFilter]="false" [filterMode]="'startWith'" [enableFilter]="true"
-  [enableReorder]="true" [enableResize]="true" [checkSelectFnt]="isSelect" [(state)]="state"
-  (stateChange)="onStateChange($event)" (filterChange)="onFilterChange($event)">
+<div class="container">
+  <lib-ngx-full-grid [values]="data" [enableSorting]="true" (selectChange)="onSelectItem($event)"
+    [selectedItems]="selectedItems" [backendFilter]="false" [filterMode]="'startWith'" [enableFilter]="true"
+    [enableReorder]="true" [enableResize]="true" [checkSelectFnt]="isSelect" [(state)]="state"
+    (stateChange)="onStateChange($event)" (filterChange)="onFilterChange($event)">
 
-</lib-ngx-full-grid>
+  </lib-ngx-full-grid>
 
+</div>
 <ul>
   <li *ngFor="let column of state.columns">
     <mat-checkbox (change)="onChange(column)" [checked]="column.visible">{{ column.name }} {{ column.width }}
