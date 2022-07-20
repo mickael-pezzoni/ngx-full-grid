@@ -4,5 +4,8 @@
   height: 60px;
   .search-field {
     width: 100%;
+    ::ng-deep .mat-form-field-infix {
+      width: auto !important;
+    }
   }
 }

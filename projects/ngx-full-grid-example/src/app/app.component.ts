@@ -100,7 +100,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   selectedItems: FakeUsers[] = [];
   isSelect(currentItem: FakeUsers, selectedItem: FakeUsers): boolean {
-    return currentItem.name === selectedItem.name;
+    return currentItem.login.uuid === selectedItem.login.uuid;
   }
 
   onSelectItem(items: FakeUsers[]): void {

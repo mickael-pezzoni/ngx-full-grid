@@ -35,6 +35,7 @@ import {
   selector: 'lib-ngx-full-grid',
   templateUrl: './ngx-full-grid.component.html',
   styleUrls: ['./ngx-full-grid.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() values!: T[];
@@ -89,10 +90,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       .map((column) => column.uuid);
   }
 
-  ngAfterViewInit(): void {
-    console.log(this.columnTemplate);
-  }
-
   getValueFromProperty(item: object, property: DotNestedKeys<T>): unknown {
     const keys = (property as string).split('.');
 
@@ -118,6 +115,10 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   ): void {
     this.ctrlIsPressed = event.key === 'Control' ? false : this.ctrlIsPressed;
     this.shiftIsPressed = event.key === 'Shift' ? false : this.shiftIsPressed;
+
+    if (event.key === 'Shift') {
+      console.log('unpressed');
+    }
   }
 
   onRowSelect(selectedItem: T): void {
@@ -144,17 +145,17 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private selectRange(selectedItem: T): void {
     if (this.selectedItems.length > 0) {
       const selectedItems = [...this.selectedItems, selectedItem];
-      const largestIndex = selectedItems
-        .map((item) =>
-          this.values.findIndex((value) => this.checkSelectFnt(value, item))
-        )
-        .sort((a, b) => a + b)[0];
 
-      const smallestIndex = selectedItems
-        .map((item) =>
-          this.values.findIndex((value) => this.checkSelectFnt(value, item))
-        )
-        .sort()[0];
+      const indexItems = selectedItems.map((item) =>
+        this.values.findIndex((value) => this.checkSelectFnt(value, item))
+      );
+
+      const sortedByIndex = [
+        ...indexItems.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+      ];
+
+      const smallestIndex = sortedByIndex[0];
+      const largestIndex = sortedByIndex[sortedByIndex.length - 1];
       this.selectedItems = [
         ...this.values.slice(smallestIndex, largestIndex + 1),
       ];
@@ -192,9 +193,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   onStopResize(width: number, resizedColumn: ColumnIdentifier<T>): void {
     this.resize = false;
-
-    console.log(width, resizedColumn);
-
     this._state = {
       ...this.state,
       columns: this.state.columns.map((column) => {
