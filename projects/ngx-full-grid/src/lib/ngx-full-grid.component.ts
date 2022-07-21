@@ -122,9 +122,9 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   }
 
   onRowSelect(selectedItem: T): void {
-    const ilAlreadySelected = this.isSelect(selectedItem);
+    const iSAlreadySelected = this.isSelect(selectedItem);
     if (this.ctrlIsPressed) {
-      this.selectedItems = ilAlreadySelected
+      this.selectedItems = iSAlreadySelected
         ? [
             ...this.selectedItems.filter(
               (item) => !this.checkSelectFnt(item, selectedItem)
@@ -132,8 +132,8 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
           ]
         : [...this.selectedItems, selectedItem];
     } else if (this.shiftIsPressed) {
-      this.selectRange(selectedItem);
-    } else if (ilAlreadySelected) {
+      this.selectRange(selectedItem, iSAlreadySelected);
+    } else if (iSAlreadySelected) {
       this.selectedItems = this.selectedItems.length > 1 ? [selectedItem] : [];
     } else {
       this.selectedItems = [selectedItem];
@@ -142,20 +142,32 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     this.selectChange.emit(this.selectedItems);
   }
 
-  private selectRange(selectedItem: T): void {
+  private selectRange(selectedItem: T, iSAlreadySelected: boolean): void {
     if (this.selectedItems.length > 0) {
-      const selectedItems = [...this.selectedItems, selectedItem];
-
-      const indexItems = selectedItems.map((item) =>
-        this.values.findIndex((value) => this.checkSelectFnt(value, item))
+      const currentItemIndex = this.values.findIndex((item) =>
+        this.checkSelectFnt(item, selectedItem)
       );
-
-      const sortedByIndex = [
-        ...indexItems.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+      const selectedItems = [
+        ...this.selectedItems.filter(
+          (item) => !this.checkSelectFnt(item, selectedItem)
+        ),
+        selectedItem,
       ];
 
-      const smallestIndex = sortedByIndex[0];
-      const largestIndex = sortedByIndex[sortedByIndex.length - 1];
+      const sortedIndex = selectedItems
+        .map((item) =>
+          this.values.findIndex((value) => this.checkSelectFnt(value, item))
+        )
+        .sort((a, b) => (a > b ? 1 : a < b ? -1 : 0));
+
+      const finallyIndex =
+        currentItemIndex > sortedIndex[0]
+          ? sortedIndex.filter((index) => index <= currentItemIndex)
+          : sortedIndex;
+      // si l'index de selectedItem est inférieur aux index déja sélectionné alors je l'ajoute sinon
+      const smallestIndex = finallyIndex[0];
+      const largestIndex = finallyIndex[finallyIndex.length - 1];
+
       this.selectedItems = [
         ...this.values.slice(smallestIndex, largestIndex + 1),
       ];
@@ -210,25 +222,27 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
     const droppedColumn = event.item.data as ColumnIdentifier<T>;
-    const columnTarget = this.state.columns[event.currentIndex];
+    const columnTarget = this.state.columns.filter((column) => column.visible)[
+      event.currentIndex
+    ];
+    const updateColumn = this.state.columns.map((column, index) => {
+      if (columnTarget.property === column.property) {
+        return {
+          ...droppedColumn,
+          index: column.index,
+        };
+      } else if (droppedColumn.property === column.property) {
+        return {
+          ...columnTarget,
+          index: column.index,
+        };
+      }
+      return column;
+    });
+
     this._state = {
-      ...this._state,
-      columns: [
-        ...this.state.columns.map((column, index) => {
-          if (index === event.currentIndex) {
-            return {
-              ...droppedColumn,
-              index: event.currentIndex + 1,
-            };
-          } else if (index === event.previousIndex) {
-            return {
-              ...columnTarget,
-              index: event.previousIndex + 1,
-            };
-          }
-          return column;
-        }),
-      ],
+      ...this.state,
+      columns: [...updateColumn],
     };
 
     this.emitState();
