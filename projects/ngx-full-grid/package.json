@@ -5,7 +5,8 @@
     "@angular/common": "^13.3.0",
     "@angular/core": "^13.3.0",
     "@angular/material": "^13.3.9",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "angular-resizable-element": "^5.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

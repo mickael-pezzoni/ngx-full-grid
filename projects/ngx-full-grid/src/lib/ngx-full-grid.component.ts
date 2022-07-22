@@ -132,7 +132,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
           ]
         : [...this.selectedItems, selectedItem];
     } else if (this.shiftIsPressed) {
-      this.selectRange(selectedItem, iSAlreadySelected);
+      this.selectRange(selectedItem);
     } else if (iSAlreadySelected) {
       this.selectedItems = this.selectedItems.length > 1 ? [selectedItem] : [];
     } else {
@@ -142,7 +142,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     this.selectChange.emit(this.selectedItems);
   }
 
-  private selectRange(selectedItem: T, iSAlreadySelected: boolean): void {
+  private selectRange(selectedItem: T): void {
     if (this.selectedItems.length > 0) {
       const currentItemIndex = this.values.findIndex((item) =>
         this.checkSelectFnt(item, selectedItem)
@@ -205,19 +205,21 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   onStopResize(width: number, resizedColumn: ColumnIdentifier<T>): void {
     this.resize = false;
-    this._state = {
-      ...this.state,
-      columns: this.state.columns.map((column) => {
-        if (column.property === resizedColumn.property) {
-          return {
-            ...column,
-            width: width,
-          };
-        }
-        return column;
-      }),
-    };
-    this.emitState();
+    // console.log(this.state.columns);
+    // this._state = {
+    //   ...this.state,
+    //   columns: this.state.columns.map((column) => {
+    //     if (column.property === resizedColumn.property) {
+    //       console.log(width);
+    //       return {
+    //         ...column,
+    //         width: width,
+    //       };
+    //     }
+    //     return column;
+    //   }),
+    // };
+    // this.emitState();
   }
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {

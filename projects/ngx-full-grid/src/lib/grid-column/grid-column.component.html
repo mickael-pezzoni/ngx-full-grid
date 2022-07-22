@@ -1,16 +1,27 @@
 <div class="header" matRipple>
-  <button class="sorting-button" [disableRipple]="true" *ngIf="enableSorting; else headerTemplate" mat-button
-    (click)="onSortChange()">
+  <button
+    class="sorting-button"
+    [disableRipple]="true"
+    *ngIf="enableSorting; else headerTemplate"
+    mat-button
+    (click)="onSortChange()"
+  >
     <ng-container *ngIf="template !== undefined; else originalColumnTemplate">
-      <ng-container *ngTemplateOutlet="template;context: {column: column}"></ng-container>
+      <ng-container
+        *ngTemplateOutlet="template; context: { column: column }"
+      ></ng-container>
     </ng-container>
     <ng-template #originalColumnTemplate>
       {{ column.name }}
     </ng-template>
 
     <ng-container *ngIf="column.sort !== undefined">
-      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortDesc">expand_more</mat-icon>
-      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortAsc">expand_less</mat-icon>
+      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortDesc"
+        >expand_more</mat-icon
+      >
+      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortAsc"
+        >expand_less</mat-icon
+      >
     </ng-container>
   </button>
   <ng-template #headerTemplate>

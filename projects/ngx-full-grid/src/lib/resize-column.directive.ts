@@ -1,4 +1,6 @@
+import { ColumnIdentifier } from './ngx-full-grid.model';
 import {
+  ChangeDetectorRef,
   Directive,
   ElementRef,
   EventEmitter,
@@ -13,7 +15,7 @@ import { MatTable } from '@angular/material/table';
 @Directive({
   selector: '[libResizeColumn]',
 })
-export class ResizeColumnDirective<T> {
+export class ResizeColumnDirective<T extends object> {
   @Input('resizeColumn') resizable!: boolean;
 
   @Input() index!: number;
@@ -21,7 +23,9 @@ export class ResizeColumnDirective<T> {
   private startX = 0;
 
   private startWidth = 0;
+  private startWithNextColumn = 0;
 
+  @Input() columnUuid!: string;
   @Input() table!: HTMLElement;
 
   @Input()
@@ -30,10 +34,13 @@ export class ResizeColumnDirective<T> {
 
   @Output() resizeStart = new EventEmitter<void>();
   @Output() resizeEnd = new EventEmitter<number>();
-
   private resizing = false;
 
-  constructor(private renderer: Renderer2, private elementRef: ElementRef) {}
+  constructor(
+    private renderer: Renderer2,
+    private elementRef: ElementRef<HTMLElement>,
+    private changeDetector: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     if (this.resizable) {
@@ -46,17 +53,20 @@ export class ResizeColumnDirective<T> {
       this.renderer.appendChild(this.elementRef.nativeElement, resizer);
       this.renderer.listen(resizer, 'mousedown', this.onMouseDown);
       this.renderer.listen(this.table, 'mousemove', this.onMouseMove);
-
-      this.cellElements.forEach((cell) =>
-        this.renderer.setStyle(cell, 'width', `${this.width}px`)
-      );
     }
   }
 
   onMouseDown = (event: MouseEvent) => {
     this.resizing = true;
-    this.startX = event.clientX;
-    this.startWidth = this.elementRef.nativeElement.offsetWidth;
+
+    const { width, right } =
+      this.elementRef.nativeElement.getBoundingClientRect();
+    // this.startWidth = this.elementRef?.nativeElement.clientWidth;
+    this.startWithNextColumn =
+      this.elementRef?.nativeElement.nextElementSibling?.clientWidth ?? 0;
+    this.startX = right;
+    this.startWidth = width;
+
     this.resizeStart.emit();
   };
 
@@ -65,36 +75,64 @@ export class ResizeColumnDirective<T> {
       this.resizing = false;
       this.renderer.removeClass(this.table, 'resizing');
       this.resizeEnd.emit(this.width);
+
+      this.resizeEnd.emit();
     }
   }
 
+  getAllNextColumns(element: Element): Element[] {
+    const subColumn =
+      element.nextElementSibling !== undefined &&
+      element.nextElementSibling !== null
+        ? this.getAllNextColumns(element.nextElementSibling)
+        : undefined;
+    const columns: Element[] = [element];
+    if (subColumn !== undefined) {
+      return [...columns, ...subColumn];
+    }
+
+    return columns;
+  }
+
   onMouseMove = (event: MouseEvent) => {
-    const offset = 0;
     if (this.resizing && event.buttons) {
       this.renderer.addClass(this.table, 'resizing');
 
       // Calculate width of column
-      const width = this.startWidth + (event.clientX - this.startX - offset);
 
       // Set table header width
-      // this.renderer.setStyle(
-      //   this.elementRef.nativeElement,
-      //   'width',
-      //   `${width}px`
-      // );
 
+      const width = this.startWidth + event.clientX - this.startX;
+
+      this.renderer.setStyle(
+        this.elementRef.nativeElement,
+        'width',
+        `${width}px`
+      );
+
+      const nextWith = this.startWithNextColumn - (event.clientX - this.startX);
+
+      console.log(this.startWithNextColumn, ' - ', nextWith);
+
+      // console.log(nextWith);
+
+      this.renderer.setStyle(
+        this.elementRef.nativeElement.nextElementSibling,
+        'width',
+        `${nextWith}px`
+      );
       this.width = width;
+
       // Set table cells width
 
-      this.cellElements.forEach((cell) =>
-        this.renderer.setStyle(cell, 'width', `${width}px`)
-      );
+      // this.cellElements.forEach((cell) =>
+      //   this.renderer.setStyle(cell, 'width', `${this.width}px`)
+      // );
+      this.changeDetector.detectChanges();
     }
   };
 
   get cellElements(): Element[] {
-    return Array.from(this.table.querySelectorAll('.mat-row')).map((row) =>
-      row.querySelectorAll('.mat-cell').item(this.index)
-    );
+    return Array.from(this.table.getElementsByClassName(this.columnUuid));
   }
 }

@@ -1,6 +1,9 @@
 :host {
   .mat-table {
     width: 100%;
+    // max-width: 100% !important;
+    // white-space: nowrap !important;
+
     &.resizing {
       -moz-user-select: none;
       -ms-user-select: none;

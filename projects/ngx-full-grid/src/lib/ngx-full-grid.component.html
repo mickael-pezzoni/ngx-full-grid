@@ -1,7 +1,6 @@
 <table
   mat-table
   #matTable
-  matSort
   [cdkDropListData]="state.columns"
   (cdkDropListDropped)="onDropColumn($event)"
   cdkDropListOrientation="horizontal"
@@ -16,13 +15,16 @@
     <th
       mat-header-cell
       libResizeColumn
+      #toto
+      [id]="column.uuid"
+      [columnUuid]="column.uuid"
       (resizeStart)="onResize()"
-      [width]="column.width"
       (resizeEnd)="onStopResize($event, column)"
       [table]="matTableElement.nativeElement"
       [resizeColumn]="enableResize"
       *matHeaderCellDef
     >
+      {{ column.name }} {{ toto.clientWidth }}
       <lib-grid-column
         cdkDrag
         [cdkDragData]="column"
@@ -43,7 +45,7 @@
       >
       </lib-grid-filter>
     </th>
-    <td mat-cell *matCellDef="let element">
+    <td mat-cell *matCellDef="let element" [class]="column.uuid">
       <ng-container
         *ngIf="cellTemplate !== undefined; else originalCellTemplate"
       >

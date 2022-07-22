@@ -49,12 +49,14 @@ export class AppComponent implements OnInit, OnDestroy {
         property: 'name.first',
         visible: true,
         index: 4,
+        width: 200,
       },
       {
         name: 'Last name',
         property: 'name.last',
         visible: true,
         index: 5,
+        width: 200,
       },
       {
         name: 'Username',
@@ -68,11 +70,13 @@ export class AppComponent implements OnInit, OnDestroy {
         name: 'City',
         property: 'location.city',
         visible: true,
+        width: 200,
       },
       {
         name: 'Zip',
         property: 'location.postcode',
         visible: false,
+        width: 200,
       },
       {
         name: 'Age',
@@ -86,6 +90,7 @@ export class AppComponent implements OnInit, OnDestroy {
         property: 'email',
         visible: false,
         index: 3,
+        width: 200,
       },
     ],
   };
