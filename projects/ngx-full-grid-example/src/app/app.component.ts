@@ -1,6 +1,7 @@
 import { FakeUserService, PaginationParams } from './fake-user.service';
 import {
   FilterEntity,
+  GridParams,
   GridState,
   SortDirection,
 } from './../../../ngx-full-grid/src/lib/ngx-full-grid.model';
@@ -83,7 +84,7 @@ export class AppComponent implements OnInit, OnDestroy {
         property: 'dob.age',
         visible: true,
         index: 1,
-        width: 400,
+        width: 80,
       },
       {
         name: 'Email',
@@ -127,16 +128,13 @@ export class AppComponent implements OnInit, OnDestroy {
         })),
       ],
     };
-    console.log(this.state);
   }
 
-  onFilterChange(event: FilterEntity<FakeUsers>): void {
+  onParamsChange(event: GridParams<FakeUsers>): void {
     console.log(event);
   }
 
-  onStateChange(event: GridState<FakeUsers>): void {
-    console.log('STATE ', event);
-  }
+  onStateChange(event: GridState<FakeUsers>): void {}
 
   addData(): void {
     // this.data = [...this.data, this.dataToAdd];

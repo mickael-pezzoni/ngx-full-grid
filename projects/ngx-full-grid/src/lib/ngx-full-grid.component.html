@@ -1,63 +1,27 @@
-<table
-  mat-table
-  #matTable
-  [cdkDropListData]="state.columns"
-  (cdkDropListDropped)="onDropColumn($event)"
-  cdkDropListOrientation="horizontal"
-  cdkDropList
-  [dataSource]="values | filter: filter:backendFilter:filterMode"
-  class="mat-elevation-z8 noselect"
->
-  <ng-container
-    *ngFor="let column of state.columns; let i = index"
-    [matColumnDef]="column.uuid"
-  >
-    <th
-      mat-header-cell
-      libResizeColumn
-      #toto
-      [id]="column.uuid"
-      [columnUuid]="column.uuid"
-      (resizeStart)="onResize()"
-      (resizeEnd)="onStopResize($event, column)"
-      [table]="matTableElement.nativeElement"
-      [resizeColumn]="enableResize"
-      *matHeaderCellDef
-    >
+<table mat-table #matTable [cdkDropListData]="state.columns" (cdkDropListDropped)="onDropColumn($event)"
+  cdkDropListOrientation="horizontal" cdkDropList [dataSource]="values | filter: filter:backendFilter:filterMode"
+  class="mat-elevation-z8 noselect">
+  <ng-container *ngFor="let column of state.columns; let i = index" [matColumnDef]="column.uuid">
+    <th #header mat-header-cell libResizeColumn #toto [id]="column.uuid" (resizeStart)="onResize()"
+      (resizeEnd)="onStopResize()" [width]="column.width" [table]="matTableElement.nativeElement"
+      [resizeColumn]="enableResize" *matHeaderCellDef>
       {{ column.name }} {{ toto.clientWidth }}
-      <lib-grid-column
-        cdkDrag
-        [cdkDragData]="column"
-        [cdkDragDisabled]="!enableReorder"
-        class="column"
-        [template]="columnTemplate"
-        [id]="column.uuid"
-        [column]="column"
-        [enableFilter]="enableFilter"
-        [enableSorting]="enableSorting"
-        (sortChange)="onSortChange($event, column)"
-      >
+      <lib-grid-column cdkDrag [cdkDragData]="column" [cdkDragDisabled]="!enableReorder" class="column"
+        [template]="columnTemplate" [id]="column.uuid" [column]="column" [enableFilter]="enableFilter"
+        [enableSorting]="enableSorting" (sortChange)="onSortChange($event, column)">
       </lib-grid-column>
-      <lib-grid-filter
-        *ngIf="enableFilter"
-        (filterChange)="onFilterChange($event, column)"
-        [column]="column"
-      >
+      <lib-grid-filter *ngIf="enableFilter" (filterChange)="onFilterChange($event, column)" [column]="column">
       </lib-grid-filter>
     </th>
     <td mat-cell *matCellDef="let element" [class]="column.uuid">
-      <ng-container
-        *ngIf="cellTemplate !== undefined; else originalCellTemplate"
-      >
-        <ng-container
-          *ngTemplateOutlet="
+      <ng-container *ngIf="cellTemplate !== undefined; else originalCellTemplate">
+        <ng-container *ngTemplateOutlet="
             cellTemplate;
             context: {
               item: element,
               value: getValueFromProperty(element, column.property)
             }
-          "
-        >
+          ">
         </ng-container>
       </ng-container>
       <ng-template #originalCellTemplate>
@@ -66,13 +30,9 @@
     </td>
   </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr
-    mat-row
-    (click)="onRowSelect(row)"
-    [class]="isSelect(row) ? selectedClass : ''"
-    *matRowDef="let row; columns: displayedColumns"
-  ></tr>
+  <tr mat-header-row *matHeaderRowDef="visibleColumnsUuid"></tr>
+  <tr mat-row (click)="onRowSelect(row)" [class]="isSelect(row) ? selectedClass : ''"
+    *matRowDef="let row; columns: visibleColumnsUuid"></tr>
 
   <!-- Row shown when there is no matching data. -->
   <!-- <tr class="mat-row" *matNoDataRow>

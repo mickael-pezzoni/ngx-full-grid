@@ -9,10 +9,13 @@ import {
   GridSort,
   GridStateApplied,
   FilterMode,
+  GridSortParam,
+  GridParams,
 } from './ngx-full-grid.model';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -20,8 +23,10 @@ import {
   Input,
   OnInit,
   Output,
+  QueryList,
   TemplateRef,
   ViewChild,
+  ViewChildren,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { v4 } from 'uuid';
@@ -51,6 +56,8 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @ViewChild('matTable', { static: true, read: ElementRef })
   readonly matTableElement!: ElementRef<HTMLElement>;
   @Input() columnTemplate?: TemplateRef<unknown>;
+  @ViewChildren('header')
+  headers!: QueryList<ElementRef<HTMLElement>>;
   @Input() cellTemplate?: TemplateRef<unknown>;
   @Input()
   set state(state: GridState<T>) {
@@ -72,22 +79,33 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Output() filterChange = new EventEmitter<FilterEntity<T>>();
   @Output() selectChange = new EventEmitter<T[]>();
   @Output() stateChange = new EventEmitter<GridState<T>>();
+  @Output() paramsChange = new EventEmitter<GridParams<T>>();
 
   filter: FilterEntity<T> = {};
-
+  params: GridParams<T> = {
+    columns: [],
+    sorts: [],
+    ...this.filter,
+  };
   private _state!: GridStateApplied<T>;
   private ctrlIsPressed = false;
   private shiftIsPressed = false;
   resize = false;
 
-  constructor() {}
+  constructor(private changeDetector: ChangeDetectorRef) {}
 
   ngOnInit(): void {}
 
-  get displayedColumns(): string[] {
+  get visibleColumnsUuid(): string[] {
     return this.state.columns
       .filter((column) => column.visible)
       .map((column) => column.uuid);
+  }
+
+  get visibleColumnsProperty(): string[] {
+    return this.state.columns
+      .filter((column) => column.visible)
+      .map((column) => column.property);
   }
 
   getValueFromProperty(item: object, property: DotNestedKeys<T>): unknown {
@@ -115,10 +133,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   ): void {
     this.ctrlIsPressed = event.key === 'Control' ? false : this.ctrlIsPressed;
     this.shiftIsPressed = event.key === 'Shift' ? false : this.shiftIsPressed;
-
-    if (event.key === 'Shift') {
-      console.log('unpressed');
-    }
   }
 
   onRowSelect(selectedItem: T): void {
@@ -188,10 +202,11 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       [column.property]: value === '' ? undefined : value,
     };
     this.filterChange.emit(this.filter);
+    this.updateParams();
   }
 
   private cleanSort(): void {
-    this.state = {
+    this._state = {
       ...this.state,
       columns: [
         ...this.state.columns.map((column) => ({ ...column, sort: undefined })),
@@ -203,23 +218,27 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     this.resize = true;
   }
 
-  onStopResize(width: number, resizedColumn: ColumnIdentifier<T>): void {
+  onStopResize(): void {
     this.resize = false;
-    // console.log(this.state.columns);
-    // this._state = {
-    //   ...this.state,
-    //   columns: this.state.columns.map((column) => {
-    //     if (column.property === resizedColumn.property) {
-    //       console.log(width);
-    //       return {
-    //         ...column,
-    //         width: width,
-    //       };
-    //     }
-    //     return column;
-    //   }),
-    // };
-    // this.emitState();
+    const columnsElement = this.headers
+      .toArray()
+      .map((col) => col.nativeElement);
+
+    const columns = this.state.columns.map((column) => {
+      const columnElement = columnsElement.find(
+        (elt) => elt.id === column.uuid
+      );
+      return {
+        ...column,
+        width: columnElement?.clientWidth ?? column.width,
+      };
+    });
+
+    this._state = {
+      ...this.state,
+      columns: columns,
+    };
+    this.emitState();
   }
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
@@ -254,7 +273,16 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     this.stateChange.emit(this.state);
   }
 
-  private calculSortIndex(
+  private updateParams(): void {
+    this.params = {
+      ...this.filter,
+      sorts: this.gridSortParam,
+      columns: this.visibleColumnsProperty,
+    };
+    this.paramsChange.emit(this.params);
+  }
+
+  private calcsSortIndex(
     sort: GridSort<T>,
     column: ColumnIdentifier<T>
   ): number {
@@ -263,11 +291,15 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       .sort()
       .reverse()[0];
 
-    if (sort.index === column.sort?.index) {
+    const sortHasActive = this.state.columns.some(
+      (column) => column.sort !== undefined
+    );
+
+    if (sort.index === column.sort?.index && sortHasActive) {
       return sort.index;
     }
 
-    if (sortIndex < this.displayedColumns.length) {
+    if (sortIndex < this.visibleColumnsUuid.length) {
       return sortIndex + 1;
     }
 
@@ -282,7 +314,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       this.cleanSort();
     }
     if (sort !== undefined) {
-      const newIndex = this.calculSortIndex(sort, sortedColumn);
+      const newIndex = this.calcsSortIndex(sort, sortedColumn);
       this.updateSortColum(sortedColumn, { ...sort, index: newIndex });
     }
 
@@ -315,8 +347,22 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
       this.updateSortColum(sortedColumn, undefined);
     }
-
     this.emitState();
+    this.updateParams();
+  }
+
+  get gridSortParam(): GridSortParam<T>[] {
+    return this.state.columns
+      .filter((column) => column.sort !== undefined)
+      .sort(
+        (a, b) => (a.sort as GridSort<T>).index - (b.sort as GridSort<T>).index
+      )
+      .map(
+        (column) =>
+          `${column.property}|${
+            (column.sort as GridSort<T>).direction
+          }` as GridSortParam<T>
+      );
   }
 
   private updateSortColum(

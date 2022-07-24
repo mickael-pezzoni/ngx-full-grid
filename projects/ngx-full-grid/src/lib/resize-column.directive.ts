@@ -25,7 +25,6 @@ export class ResizeColumnDirective<T extends object> {
   private startWidth = 0;
   private startWithNextColumn = 0;
 
-  @Input() columnUuid!: string;
   @Input() table!: HTMLElement;
 
   @Input()
@@ -104,24 +103,24 @@ export class ResizeColumnDirective<T extends object> {
 
       const width = this.startWidth + event.clientX - this.startX;
 
-      this.renderer.setStyle(
-        this.elementRef.nativeElement,
-        'width',
-        `${width}px`
-      );
+      // this.renderer.setStyle(
+      //   this.elementRef.nativeElement,
+      //   'width',
+      //   `${width}px`
+      // );
 
       const nextWith = this.startWithNextColumn - (event.clientX - this.startX);
 
       console.log(this.startWithNextColumn, ' - ', nextWith);
 
       // console.log(nextWith);
+      this.width = width;
 
       this.renderer.setStyle(
         this.elementRef.nativeElement.nextElementSibling,
         'width',
         `${nextWith}px`
       );
-      this.width = width;
 
       // Set table cells width
 
@@ -132,7 +131,7 @@ export class ResizeColumnDirective<T extends object> {
     }
   };
 
-  get cellElements(): Element[] {
-    return Array.from(this.table.getElementsByClassName(this.columnUuid));
-  }
+  // get cellElements(): Element[] {
+  //   return Array.from(this.table.getElementsByClassName(this.id));
+  // }
 }

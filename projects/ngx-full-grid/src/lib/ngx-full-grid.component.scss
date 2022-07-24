@@ -24,6 +24,8 @@
     }
     .mat-header-cell {
       position: relative;
+      white-space: nowrap;
+      text-overflow: ellipsis;
       &:not(:last-child) {
         .resize-holder {
           cursor: col-resize;
@@ -41,6 +43,8 @@
       border-right: 1px solid rgba(0, 0, 0, 0.12);
       overflow: hidden;
       padding: 0 10px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
   .item-selected {

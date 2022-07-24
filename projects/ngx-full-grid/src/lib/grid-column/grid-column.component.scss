@@ -27,6 +27,10 @@
 }
 .sorting-button {
   height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .header {

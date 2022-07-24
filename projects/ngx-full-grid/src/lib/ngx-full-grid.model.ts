@@ -49,3 +49,12 @@ export interface GridState<T extends object> {
 export interface GridStateApplied<T extends object> extends GridState<T> {
   columns: ColumnIdentifier<T>[];
 }
+
+export type GridSortParam<T> = keyof T extends string
+  ? `${keyof T}|${SortDirection}`
+  : '';
+
+export type GridParams<T> = {
+  sorts: GridSortParam<T>[];
+  columns: string[];
+} & FilterEntity<T>;
