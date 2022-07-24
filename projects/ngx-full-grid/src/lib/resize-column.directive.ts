@@ -111,8 +111,6 @@ export class ResizeColumnDirective<T extends object> {
 
       const nextWith = this.startWithNextColumn - (event.clientX - this.startX);
 
-      console.log(this.startWithNextColumn, ' - ', nextWith);
-
       // console.log(nextWith);
       this.width = width;
 

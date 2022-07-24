@@ -230,7 +230,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       );
       return {
         ...column,
-        width: columnElement?.clientWidth ?? column.width,
+        width: columnElement?.getBoundingClientRect().width ?? column.width,
       };
     });
 
@@ -239,6 +239,10 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       columns: columns,
     };
     this.emitState();
+  }
+
+  trackByFnt(index: number): number {
+    return index;
   }
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
