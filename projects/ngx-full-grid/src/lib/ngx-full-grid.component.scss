@@ -1,7 +1,9 @@
 :host {
+  width: 100%;
   .mat-table {
+    table-layout: fixed;
     width: 100%;
-    // max-width: 100% !important;
+    max-width: 100%;
     // white-space: nowrap !important;
 
     &.resizing {
@@ -10,13 +12,6 @@
       user-select: none;
       cursor: col-resize;
     }
-    .mat-cell {
-      span {
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
     ::ng-deep thead {
       position: sticky;
       top: 0;
@@ -24,8 +19,6 @@
     }
     .mat-header-cell {
       position: relative;
-      white-space: nowrap;
-      text-overflow: ellipsis;
       &:not(:last-child) {
         .resize-holder {
           cursor: col-resize;
@@ -38,13 +31,17 @@
         }
       }
     }
+
     .mat-cell,
     .mat-header-cell {
       border-right: 1px solid rgba(0, 0, 0, 0.12);
       overflow: hidden;
-      padding: 0 10px;
+      width: auto;
+      min-width: 10%;
+      max-width: 50%;
       text-overflow: ellipsis;
       white-space: nowrap;
+      padding: 0 10px;
     }
   }
   .item-selected {

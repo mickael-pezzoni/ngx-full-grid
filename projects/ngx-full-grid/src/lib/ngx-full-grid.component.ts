@@ -52,7 +52,12 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() backendFilter = false;
   @Input() filterMode?: FilterMode;
   @Input() checkSelectFnt!: (currentItem: T, selectedItem: T) => boolean;
-  @Input() selectedItems: T[] = [];
+  @Input() set selectedItems(selectedItems: T[]) {
+    this._selectedItems = selectedItems;
+  }
+  get selectedItems(): T[] {
+    return this._selectedItems;
+  }
   @ViewChild('matTable', { static: true, read: ElementRef })
   readonly matTableElement!: ElementRef<HTMLElement>;
   @Input() columnTemplate?: TemplateRef<unknown>;
@@ -77,7 +82,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   }
 
   @Output() filterChange = new EventEmitter<FilterEntity<T>>();
-  @Output() selectChange = new EventEmitter<T[]>();
+  @Output() selectedItemsChange = new EventEmitter<T[]>();
   @Output() stateChange = new EventEmitter<GridState<T>>();
   @Output() paramsChange = new EventEmitter<GridParams<T>>();
 
@@ -87,6 +92,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     sorts: [],
     ...this.filter,
   };
+  _selectedItems: T[] = [];
   private _state!: GridStateApplied<T>;
   private ctrlIsPressed = false;
   private shiftIsPressed = false;
@@ -153,7 +159,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       this.selectedItems = [selectedItem];
     }
 
-    this.selectChange.emit(this.selectedItems);
+    this.selectedItemsChange.emit(this.selectedItems);
   }
 
   private selectRange(selectedItem: T): void {
@@ -228,9 +234,11 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       const columnElement = columnsElement.find(
         (elt) => elt.id === column.uuid
       );
+      const width = columnElement?.style.width.replace('%', '');
+
       return {
         ...column,
-        width: columnElement?.getBoundingClientRect().width ?? column.width,
+        width: width !== undefined ? parseInt(width, 10) : column.width,
       };
     });
 

@@ -5,7 +5,13 @@ import {
   GridState,
   SortDirection,
 } from './../../../ngx-full-grid/src/lib/ngx-full-grid.model';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import {
   Column,
   DotNestedKeys,
@@ -24,6 +30,7 @@ import { FormControl } from '@angular/forms';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'ngx-full-grid-example';
@@ -37,12 +44,8 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly fakeUsers$: Observable<FakeUsersResult>;
 
   data: FakeUsers[] = [];
-  readonly dataToAdd = {
-    position: 2,
-    name: 'Helium',
-    data: { weight: 4.0026 },
-    symbol: 'He',
-  };
+
+  selectedItems: FakeUsers[] = [];
   state: GridState<FakeUsers> = {
     columns: [
       {
@@ -50,14 +53,12 @@ export class AppComponent implements OnInit, OnDestroy {
         property: 'name.first',
         visible: true,
         index: 4,
-        width: 200,
       },
       {
         name: 'Last name',
         property: 'name.last',
         visible: true,
         index: 5,
-        width: 200,
       },
       {
         name: 'Username',
@@ -65,54 +66,53 @@ export class AppComponent implements OnInit, OnDestroy {
         visible: true,
         sort: { direction: SortDirection.ASC, index: 1 },
         index: 2,
-        width: 200,
       },
       {
         name: 'City',
         property: 'location.city',
         visible: true,
-        width: 200,
       },
       {
         name: 'Zip',
         property: 'location.postcode',
         visible: false,
-        width: 200,
       },
       {
         name: 'Age',
         property: 'dob.age',
         visible: true,
         index: 1,
-        width: 80,
       },
       {
         name: 'Email',
         property: 'email',
         visible: false,
         index: 3,
-        width: 200,
       },
     ],
   };
 
-  constructor(private readonly fakeUserService: FakeUserService) {
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+    private readonly fakeUserService: FakeUserService
+  ) {
     this.fakeUsers$ = this.fakeUsersRequest$;
   }
 
   ngOnInit(): void {
-    this.fakeUsersRequest$.subscribe((res) => {
+    this.fakeUsers$.subscribe((res) => {
       this.data = res.results;
+      this.selectedItems = [res.results[0]];
+      this.changeDetector.detectChanges();
     });
   }
 
-  selectedItems: FakeUsers[] = [];
   isSelect(currentItem: FakeUsers, selectedItem: FakeUsers): boolean {
     return currentItem.login.uuid === selectedItem.login.uuid;
   }
 
   onSelectItem(items: FakeUsers[]): void {
-    this.selectedItems = items;
+    console.log(this.selectedItems);
   }
 
   onChange(changeColumn: Column<FakeUsers>): void {
@@ -128,6 +128,7 @@ export class AppComponent implements OnInit, OnDestroy {
         })),
       ],
     };
+    this.changeDetector.detectChanges();
   }
 
   onParamsChange(event: GridParams<FakeUsers>): void {

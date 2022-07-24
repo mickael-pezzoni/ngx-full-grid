@@ -23,13 +23,20 @@ export class ResizeColumnDirective<T extends object> {
   private startX = 0;
 
   private startWidth = 0;
-  private startWithNextColumn = 0;
 
   @Input() table!: HTMLElement;
 
   @Input()
-  @HostBinding('style.width.px')
+  @HostBinding('style.width.%')
   width?: number;
+
+  startWithNextColumns: { id: string; with: number }[] = [];
+
+  private withLimit = 5;
+
+  @Input()
+  @HostBinding('attr.id')
+  id?: string;
 
   @Output() resizeStart = new EventEmitter<void>();
   @Output() resizeEnd = new EventEmitter<number>();
@@ -60,12 +67,14 @@ export class ResizeColumnDirective<T extends object> {
 
     const { width, right } =
       this.elementRef.nativeElement.getBoundingClientRect();
-    // this.startWidth = this.elementRef?.nativeElement.clientWidth;
-    this.startWithNextColumn =
-      this.elementRef?.nativeElement.nextElementSibling?.clientWidth ?? 0;
     this.startX = right;
     this.startWidth = width;
 
+    this.startWithNextColumns = this.getAllNextColumns(
+      this.elementRef.nativeElement
+    )
+      .filter((col) => col.id !== this.id)
+      .map((col) => ({ id: col.id, with: col.getBoundingClientRect().width }));
     this.resizeStart.emit();
   };
 
@@ -97,39 +106,43 @@ export class ResizeColumnDirective<T extends object> {
     if (this.resizing && event.buttons) {
       this.renderer.addClass(this.table, 'resizing');
 
-      // Calculate width of column
+      const columns = this.getAllNextColumns(
+        this.elementRef.nativeElement
+      ).filter((column) => column.id !== this.id);
 
-      // Set table header width
+      const totalWidth: number = columns
+        .map((column) => column.clientWidth)
+        .reduce((value, previousValue) => value + previousValue);
 
-      const width = this.startWidth + event.clientX - this.startX;
-
-      // this.renderer.setStyle(
-      //   this.elementRef.nativeElement,
-      //   'width',
-      //   `${width}px`
-      // );
-
-      const nextWith = this.startWithNextColumn - (event.clientX - this.startX);
-
-      // console.log(nextWith);
-      this.width = width;
-
-      this.renderer.setStyle(
-        this.elementRef.nativeElement.nextElementSibling,
-        'width',
-        `${nextWith}px`
+      const newWidth = this.getPxToPercent(
+        this.startWidth + event.clientX - this.startX,
+        this.table.clientWidth
       );
 
-      // Set table cells width
+      this.width = newWidth < this.withLimit ? this.withLimit : newWidth;
+      columns.forEach((col) => {
+        const nextWithCol =
+          (this.startWithNextColumns.find((original) => original.id === col.id)
+            ?.with ?? 0) -
+          (event.clientX - this.startX) / columns.length;
 
-      // this.cellElements.forEach((cell) =>
-      //   this.renderer.setStyle(cell, 'width', `${this.width}px`)
-      // );
+        const newColumnWith = this.getPxToPercent(
+          nextWithCol,
+          this.table.clientWidth
+        );
+
+        this.renderer.setStyle(
+          col,
+          'width',
+          `${newColumnWith < this.withLimit ? this.withLimit : newColumnWith}%`
+        );
+      });
+
       this.changeDetector.detectChanges();
     }
   };
 
-  // get cellElements(): Element[] {
-  //   return Array.from(this.table.getElementsByClassName(this.id));
-  // }
+  private getPxToPercent(partialValue: number, totalValue: number): number {
+    return (partialValue / totalValue) * 100;
+  }
 }
