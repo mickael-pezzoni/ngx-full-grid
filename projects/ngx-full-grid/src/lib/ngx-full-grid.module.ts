@@ -16,6 +16,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ResizeColumnDirective } from './resize-column.directive';
 import { GridFilterComponent } from './grid-filter/grid-filter.component';
+import { CustomColumnComponent } from './custom-column/custom-column.component';
 @NgModule({
   declarations: [
     NgxFullGridComponent,
@@ -23,6 +24,7 @@ import { GridFilterComponent } from './grid-filter/grid-filter.component';
     GridColumnComponent,
     ResizeColumnDirective,
     GridFilterComponent,
+    CustomColumnComponent,
   ],
   imports: [
     MatTableModule,
@@ -38,6 +40,6 @@ import { GridFilterComponent } from './grid-filter/grid-filter.component';
     BrowserAnimationsModule,
     MatBadgeModule,
   ],
-  exports: [NgxFullGridComponent],
+  exports: [NgxFullGridComponent, CustomColumnComponent],
 })
 export class NgxFullGridModule {}

@@ -1,3 +1,4 @@
+import { CustomColumnComponent } from './custom-column/custom-column.component';
 import {
   Column,
   DotNestedKeys,
@@ -13,10 +14,12 @@ import {
   GridParams,
 } from './ngx-full-grid.model';
 import {
+  AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ContentChildren,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -60,10 +63,10 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   }
   @ViewChild('matTable', { static: true, read: ElementRef })
   readonly matTableElement!: ElementRef<HTMLElement>;
-  @Input() columnTemplate?: TemplateRef<unknown>;
   @ViewChildren('header')
   headers!: QueryList<ElementRef<HTMLElement>>;
-  @Input() cellTemplate?: TemplateRef<unknown>;
+  @ViewChild('originalCellTemplate', {static: true}) originalCellTemplate!: TemplateRef<unknown>;
+  @ContentChildren(CustomColumnComponent) customColumns!: QueryList<CustomColumnComponent<T>>;
   @Input()
   set state(state: GridState<T>) {
     this._state = {
@@ -100,7 +103,10 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   constructor(private changeDetector: ChangeDetectorRef) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+
+  }
+
 
   get visibleColumnsUuid(): string[] {
     return this.state.columns
@@ -126,6 +132,18 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
         )
       : value;
   }
+
+  hasTemplate(property: DotNestedKeys<T>): boolean {
+    return this.customColumns.toArray().find((col) => col.property === property) !== undefined
+  }
+
+  getCellTemplate(property: DotNestedKeys<T>): TemplateRef<unknown> {
+    return this.customColumns.toArray().find((col) => col.property === property)?.cellTemplate ?? this.originalCellTemplate;
+  }
+  getHeaderTemplate(property: DotNestedKeys<T>): TemplateRef<unknown> | undefined {
+    return this.customColumns.toArray().find((col) => col.property === property)?.headerTemplate;
+  }
+
 
   @HostListener('document:keydown', ['$event']) private onKeyPressed(
     event: KeyboardEvent

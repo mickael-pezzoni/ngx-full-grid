@@ -49,6 +49,12 @@ export class AppComponent implements OnInit, OnDestroy {
   state: GridState<FakeUsers> = {
     columns: [
       {
+        name: 'Avatar',
+        property: 'picture.medium',
+        visible: true,
+        index: 1,
+      },
+      {
         name: 'First name',
         property: 'name.first',
         visible: true,
@@ -58,14 +64,14 @@ export class AppComponent implements OnInit, OnDestroy {
         name: 'Last name',
         property: 'name.last',
         visible: true,
-        index: 5,
+        index: 6,
       },
       {
         name: 'Username',
         property: 'login.username',
         visible: true,
         sort: { direction: SortDirection.ASC, index: 1 },
-        index: 2,
+        index: 3,
       },
       {
         name: 'City',
@@ -81,13 +87,13 @@ export class AppComponent implements OnInit, OnDestroy {
         name: 'Age',
         property: 'dob.age',
         visible: true,
-        index: 1,
+        index: 2,
       },
       {
         name: 'Email',
         property: 'email',
         visible: false,
-        index: 3,
+        index: 5,
       },
     ],
   };
@@ -112,7 +118,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   onSelectItem(items: FakeUsers[]): void {
-    console.log(this.selectedItems);
+    console.log(items);
   }
 
   onChange(changeColumn: Column<FakeUsers>): void {

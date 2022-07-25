@@ -2,7 +2,7 @@
   <button
     class="sorting-button"
     [disableRipple]="true"
-    *ngIf="enableSorting; else headerTemplate"
+    *ngIf="enableSorting; else notSortTemplate"
     mat-button
     (click)="onSortChange()"
   >
@@ -24,7 +24,7 @@
       >
     </ng-container>
   </button>
-  <ng-template #headerTemplate>
+  <ng-template #notSortTemplate>
     <div>
       <p>{{ column.name }}</p>
     </div>
