@@ -1,11 +1,12 @@
 import { NgxFullGridComponent } from './../ngx-full-grid.component';
 import { DotNestedKeys } from './../ngx-full-grid.model';
-import { AfterViewInit, Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'lib-custom-column',
   templateUrl: './custom-column.component.html',
-  styleUrls: ['./custom-column.component.css']
+  styleUrls: ['./custom-column.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomColumnComponent<T extends object> implements OnInit {
 

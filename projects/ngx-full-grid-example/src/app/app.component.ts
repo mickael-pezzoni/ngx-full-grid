@@ -110,12 +110,10 @@ export class AppComponent implements OnInit, OnDestroy {
       this.data = res.results;
       this.selectedItems = [res.results[0]];
       this.changeDetector.detectChanges();
+
     });
   }
 
-  indexOf(itemToCompare: FakeUsers): number {
-    return this.data.findIndex((item) => this.isSelect(item, itemToCompare));
-  }
 
   isSelect(currentItem: FakeUsers, selectedItem: FakeUsers): boolean {
     return currentItem.login.uuid === selectedItem.login.uuid;
@@ -136,8 +134,6 @@ export class AppComponent implements OnInit, OnDestroy {
         })),
       ],
     };
-    console.log(this.state);
-
     this.changeDetector.detectChanges();
   }
 
@@ -145,7 +141,10 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log(event);
   }
 
-  onStateChange(event: GridState<FakeUsers>): void {}
+  onStateChange(event: GridState<FakeUsers>): void {
+    console.log('STATE');
+
+  }
 
   addData(): void {
     // this.data = [...this.data, this.dataToAdd];

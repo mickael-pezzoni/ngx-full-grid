@@ -84,7 +84,6 @@ export class ResizeColumnDirective<T extends object> {
       this.renderer.removeClass(this.table, 'resizing');
       this.resizeEnd.emit(this.width);
 
-      this.resizeEnd.emit();
     }
   }
 

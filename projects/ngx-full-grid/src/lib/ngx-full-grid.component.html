@@ -1,8 +1,8 @@
-<ng-content></ng-content>
 
 <table
   mat-table
   #matTable
+  (contentChanged)="onContentChange()"
   [cdkDropListData]="state.columns"
   (cdkDropListDropped)="onDropColumn($event)"
   cdkDropListOrientation="horizontal"
@@ -53,10 +53,12 @@
           context: {
             value: getValueFromProperty(element, column.property),
             item: element,
+            index: indexOf(element),
             column: column
           }
         "
-      ></ng-container>
+      >
+    </ng-container>
     </td>
   </ng-container>
 
@@ -74,7 +76,7 @@
   </tr> -->
 </table>
 
-<ng-content></ng-content>
-<ng-template #originalCellTemplate let-value="value" let-column="column">
+<ng-content select="[columns]"></ng-content>
+<ng-template #originalCellTemplate let-item="item" let-index="index" let-value="value" let-column="column">
   {{ value }}
 </ng-template>

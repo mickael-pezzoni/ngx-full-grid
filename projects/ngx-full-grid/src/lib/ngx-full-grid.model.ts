@@ -56,7 +56,6 @@ export type GridSortParam<T> = keyof T extends string
   ? `${keyof T}|${SortDirection}`
   : '';
 
-export interface ColmunWith {}
 export type GridParams<T> = {
   sorts: GridSortParam<T>[];
   columns: string[];

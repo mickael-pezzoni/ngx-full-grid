@@ -4,6 +4,7 @@ import {
   SortDirection,
 } from './../ngx-full-grid.model';
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
@@ -19,6 +20,7 @@ import {
   selector: 'lib-grid-column',
   templateUrl: './grid-column.component.html',
   styleUrls: ['./grid-column.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GridColumnComponent<T extends object> implements OnInit {
   @Input() column!: ColumnIdentifier<T>;

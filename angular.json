@@ -3,37 +3,6 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ngx-full-grrid": {
-      "projectType": "library",
-      "root": "projects/ngx-full-grrid",
-      "sourceRoot": "projects/ngx-full-grrid/src",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
-          "options": {
-            "project": "projects/ngx-full-grrid/ng-package.json"
-          },
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/ngx-full-grrid/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/ngx-full-grrid/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "projects/ngx-full-grrid/src/test.ts",
-            "tsConfig": "projects/ngx-full-grrid/tsconfig.spec.json",
-            "karmaConfig": "projects/ngx-full-grrid/karma.conf.js"
-          }
-        }
-      }
-    },
     "ngx-full-grid-example": {
       "projectType": "application",
       "schematics": {

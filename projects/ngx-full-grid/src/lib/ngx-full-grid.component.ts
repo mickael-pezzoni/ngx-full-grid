@@ -25,9 +25,11 @@ import {
   EventEmitter,
   HostListener,
   Input,
+  OnChanges,
   OnInit,
   Output,
   QueryList,
+  SimpleChanges,
   TemplateRef,
   ViewChild,
   ViewChildren,
@@ -46,7 +48,7 @@ import {
   styleUrls: ['./ngx-full-grid.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NgxFullGridComponent<T extends object> implements OnInit {
+export class NgxFullGridComponent<T extends object> implements OnInit, OnChanges {
   @Input() values: T[] = [];
   @Input() enableFilter = false;
   @Input() enableSorting = false;
@@ -192,7 +194,19 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     this.selectedItemsChange.emit(this.selectedItems);
   }
 
-  private indexOf(itemToCompare: T): number {
+  ngOnChanges(changes: SimpleChanges): void {
+    //Called before any other lifecycle hook. Use it to inject dependencies, but avoid any serious work here.
+    //Add '${implements OnChanges}' to the class.
+    console.log(changes);
+
+  }
+
+  onContentChange(): void {
+    console.log('ici');
+
+  }
+
+  indexOf(itemToCompare: T): number {
     return this.values.findIndex((item) =>
       this.checkSelectFnt(item, itemToCompare)
     );
