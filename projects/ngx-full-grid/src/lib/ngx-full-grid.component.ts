@@ -104,7 +104,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private ctrlIsPressed = false;
   private shiftIsPressed = false;
   resize = false;
-  isSelectRange?: boolean;
   rangeSelectDirection?: RangeSelectDirection;
 
   constructor(private changeDetector: ChangeDetectorRef) {}
@@ -183,11 +182,9 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     } else if (this.shiftIsPressed) {
       this.selectRange(selectedItem);
     } else if (iSAlreadySelected) {
-      this.isSelectRange = undefined;
       this.rangeSelectDirection = undefined;
       this.selectedItems = this.selectedItems.length > 1 ? [selectedItem] : [];
     } else {
-      this.isSelectRange = undefined;
       this.rangeSelectDirection = undefined;
       this.selectedItems = [selectedItem];
     }
@@ -207,10 +204,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
       const sortedCurrentSelectedIndex = this.sortedCurrentSelectedIndex;
 
-      const selectedItemWithoutCurrent = this.selectedItems.filter(
-        (item) => !this.checkSelectFnt(item, currentSelectedItem)
-      );
-
       const currentRangeSelectDirection: RangeSelectDirection =
         this.rangeSelectDirection === 'ASC'
           ? currentItemIndex >
@@ -227,48 +220,10 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       if (currentItemIsFirstElementSelected) {
         this.selectedItems = [currentSelectedItem];
       } else if (currentRangeSelectDirection === 'ASC') {
-        if (this.selectedItems.length === 1) {
-          this.selectRangeAsc(currentSelectedItem);
-        } else {
-          if (this.rangeSelectDirection === 'DESC') {
-            this.selectedItems = [
-              ...this.values.slice(
-                currentItemIndex,
-                this.sortedCurrentSelectedIndex[0]
-              ),
-            ];
-          } else {
-            this.selectRangeAsc(currentSelectedItem);
-          }
-        }
+        this.selectRangeAsc(currentSelectedItem);
       } else {
-        // 'DESC'
-        if (selectedItemWithoutCurrent.length === 1) {
-          this.selectRangeDesc(currentSelectedItem);
-        } else {
-          if (this.rangeSelectDirection === 'ASC') {
-            this.selectedItems = [
-              ...this.values.slice(
-                this.sortedCurrentSelectedIndex[this.selectedItems.length - 1],
-                currentItemIndex
-              ),
-            ];
-          } else {
-            this.selectRangeDesc(currentSelectedItem);
-          }
-        }
+        this.selectRangeDesc(currentSelectedItem);
       }
-      // const finallyIndex =
-      //   this.rangeSelectDirection === 'ASC'
-      //     ? sortedIndex.filter((index) => index <= currentItemIndex)
-      //     : sortedIndex;
-
-      // const smallestIndex = 50;
-      // const largestIndex = 0;
-
-      // this.selectedItems = [
-      //   ...this.values.slice(smallestIndex, largestIndex + 1),
-      // ];
 
       this.rangeSelectDirection = currentRangeSelectDirection;
     } else {
@@ -278,25 +233,47 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   private selectRangeAsc(currentSelectedItem: T): void {
     const currentItemIndex = this.indexOf(currentSelectedItem);
+    const sortedCurrentSelectedIndex = this.sortedCurrentSelectedIndex;
 
-    const largestIndex =
-      this.sortedCurrentSelectedIndex[
-        this.sortedCurrentSelectedIndex.length - 1
+    if (this.rangeSelectDirection === 'DESC') {
+      this.selectedItems = [
+        ...this.values.slice(
+          currentItemIndex,
+          sortedCurrentSelectedIndex[0] + 1
+        ),
       ];
+    } else {
+      const largestIndex =
+        sortedCurrentSelectedIndex[
+          sortedCurrentSelectedIndex.length - 1
+        ];
 
-    this.selectedItems = [
-      ...this.values.slice(currentItemIndex, largestIndex + 1),
-    ];
+      this.selectedItems = [
+        ...this.values.slice(currentItemIndex, largestIndex + 1),
+      ];
+    }
   }
 
   private selectRangeDesc(currentSelectedItem: T): void {
     const currentItemIndex = this.indexOf(currentSelectedItem);
-    this.selectedItems = [
-      ...this.values.slice(
-        this.sortedCurrentSelectedIndex[0],
-        currentItemIndex + 1
-      ),
-    ];
+    const sortedCurrentSelectedIndex = this.sortedCurrentSelectedIndex;
+
+    if (this.rangeSelectDirection === 'ASC') {
+      this.selectedItems = [
+        ...this.values.slice(
+          sortedCurrentSelectedIndex[this.selectedItems.length - 1],
+          currentItemIndex
+        ),
+      ];
+    } else {
+      this.selectedItems = [
+        ...this.values.slice(
+          sortedCurrentSelectedIndex[0],
+          currentItemIndex + 1
+        ),
+      ];
+    }
+
   }
 
   private get sortedCurrentSelectedIndex(): number[] {
