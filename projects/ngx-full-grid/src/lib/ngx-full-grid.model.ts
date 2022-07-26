@@ -37,6 +37,8 @@ export enum SortDirection {
   DESC = 'DESC',
 }
 
+export type RangeSelectDirection = 'ASC' | 'DESC';
+
 export interface GridSort<T> {
   direction: SortDirection;
   index: number;

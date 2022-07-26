@@ -15,22 +15,32 @@
     (stateChange)="onStateChange($event)"
     (paramsChange)="onParamsChange($event)"
   >
-  <lib-custom-column [grid]="grid" [property]="'name.first'" [headerTemplate]="header"  [cellTemplate]="firstNameTemplate">
-    <ng-template #header let-column="column">
-      FIRST NAME
-    </ng-template>
+    <lib-custom-column
+      [grid]="grid"
+      [property]="'name.first'"
+      [headerTemplate]="header"
+      [cellTemplate]="firstNameTemplate"
+    >
+      <ng-template #header let-column="column"> INDEX </ng-template>
 
-    <ng-template #firstNameTemplate let-value="value" let-column="column">
-      {{ value }}
-    </ng-template>
-
-  </lib-custom-column>
-  <lib-custom-column [grid]="grid" [property]="'picture.medium'" [cellTemplate]="avatarTemplate">
-    <ng-template #avatarTemplate let-value="value" let-column="column">
-      <p style="text-align: center;"><img [src]="value"></p>
-    </ng-template>
-
-  </lib-custom-column>
+      <ng-template
+        #firstNameTemplate
+        let-value="value"
+        let-item="item"
+        let-column="column"
+      >
+        <span *ngIf="item !== undefined">{{ indexOf(item) }}</span>
+      </ng-template>
+    </lib-custom-column>
+    <!-- <lib-custom-column
+      [grid]="grid"
+      [property]="'picture.thumbnail'"
+      [cellTemplate]="avatarTemplate"
+    >
+      <ng-template #avatarTemplate let-value="value" let-column="column">
+        <p style="text-align: center"><img [src]="value" /></p>
+      </ng-template>
+    </lib-custom-column> -->
   </lib-ngx-full-grid>
 </div>
 <ul>

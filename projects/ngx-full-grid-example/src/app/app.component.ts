@@ -50,7 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
     columns: [
       {
         name: 'Avatar',
-        property: 'picture.medium',
+        property: 'picture.thumbnail',
         visible: true,
         index: 1,
       },
@@ -113,13 +113,15 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  indexOf(itemToCompare: FakeUsers): number {
+    return this.data.findIndex((item) => this.isSelect(item, itemToCompare));
+  }
+
   isSelect(currentItem: FakeUsers, selectedItem: FakeUsers): boolean {
     return currentItem.login.uuid === selectedItem.login.uuid;
   }
 
-  onSelectItem(items: FakeUsers[]): void {
-    console.log(items);
-  }
+  onSelectItem(items: FakeUsers[]): void {}
 
   onChange(changeColumn: Column<FakeUsers>): void {
     this.state = {
@@ -134,6 +136,8 @@ export class AppComponent implements OnInit, OnDestroy {
         })),
       ],
     };
+    console.log(this.state);
+
     this.changeDetector.detectChanges();
   }
 

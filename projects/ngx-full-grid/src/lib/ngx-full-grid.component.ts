@@ -12,6 +12,7 @@ import {
   FilterMode,
   GridSortParam,
   GridParams,
+  RangeSelectDirection,
 } from './ngx-full-grid.model';
 import {
   AfterContentInit,
@@ -46,7 +47,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NgxFullGridComponent<T extends object> implements OnInit {
-  @Input() values!: T[];
+  @Input() values: T[] = [];
   @Input() enableFilter = false;
   @Input() enableSorting = false;
   @Input() enableReorder = false;
@@ -65,8 +66,11 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   readonly matTableElement!: ElementRef<HTMLElement>;
   @ViewChildren('header')
   headers!: QueryList<ElementRef<HTMLElement>>;
-  @ViewChild('originalCellTemplate', {static: true}) originalCellTemplate!: TemplateRef<unknown>;
-  @ContentChildren(CustomColumnComponent) customColumns!: QueryList<CustomColumnComponent<T>>;
+  @ViewChild('originalCellTemplate', { static: true })
+  originalCellTemplate!: TemplateRef<unknown>;
+  @ContentChildren(CustomColumnComponent) customColumns!: QueryList<
+    CustomColumnComponent<T>
+  >;
   @Input()
   set state(state: GridState<T>) {
     this._state = {
@@ -100,13 +104,12 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private ctrlIsPressed = false;
   private shiftIsPressed = false;
   resize = false;
+  isSelectRange?: boolean;
+  rangeSelectDirection?: RangeSelectDirection;
 
   constructor(private changeDetector: ChangeDetectorRef) {}
 
-  ngOnInit(): void {
-
-  }
-
+  ngOnInit(): void {}
 
   get visibleColumnsUuid(): string[] {
     return this.state.columns
@@ -134,16 +137,24 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   }
 
   hasTemplate(property: DotNestedKeys<T>): boolean {
-    return this.customColumns.toArray().find((col) => col.property === property) !== undefined
+    return (
+      this.customColumns.toArray().find((col) => col.property === property) !==
+      undefined
+    );
   }
 
   getCellTemplate(property: DotNestedKeys<T>): TemplateRef<unknown> {
-    return this.customColumns.toArray().find((col) => col.property === property)?.cellTemplate ?? this.originalCellTemplate;
+    return (
+      this.customColumns.toArray().find((col) => col.property === property)
+        ?.cellTemplate ?? this.originalCellTemplate
+    );
   }
-  getHeaderTemplate(property: DotNestedKeys<T>): TemplateRef<unknown> | undefined {
-    return this.customColumns.toArray().find((col) => col.property === property)?.headerTemplate;
+  getHeaderTemplate(
+    property: DotNestedKeys<T>
+  ): TemplateRef<unknown> | undefined {
+    return this.customColumns.toArray().find((col) => col.property === property)
+      ?.headerTemplate;
   }
-
 
   @HostListener('document:keydown', ['$event']) private onKeyPressed(
     event: KeyboardEvent
@@ -172,46 +183,128 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     } else if (this.shiftIsPressed) {
       this.selectRange(selectedItem);
     } else if (iSAlreadySelected) {
+      this.isSelectRange = undefined;
+      this.rangeSelectDirection = undefined;
       this.selectedItems = this.selectedItems.length > 1 ? [selectedItem] : [];
     } else {
+      this.isSelectRange = undefined;
+      this.rangeSelectDirection = undefined;
       this.selectedItems = [selectedItem];
     }
 
     this.selectedItemsChange.emit(this.selectedItems);
   }
 
-  private selectRange(selectedItem: T): void {
+  private indexOf(itemToCompare: T): number {
+    return this.values.findIndex((item) =>
+      this.checkSelectFnt(item, itemToCompare)
+    );
+  }
+
+  private selectRange(currentSelectedItem: T): void {
     if (this.selectedItems.length > 0) {
-      const currentItemIndex = this.values.findIndex((item) =>
-        this.checkSelectFnt(item, selectedItem)
+      const currentItemIndex = this.indexOf(currentSelectedItem);
+
+      const sortedCurrentSelectedIndex = this.sortedCurrentSelectedIndex;
+
+      const selectedItemWithoutCurrent = this.selectedItems.filter(
+        (item) => !this.checkSelectFnt(item, currentSelectedItem)
       );
-      const selectedItems = [
-        ...this.selectedItems.filter(
-          (item) => !this.checkSelectFnt(item, selectedItem)
-        ),
-        selectedItem,
-      ];
 
-      const sortedIndex = selectedItems
-        .map((item) =>
-          this.values.findIndex((value) => this.checkSelectFnt(value, item))
-        )
-        .sort((a, b) => (a > b ? 1 : a < b ? -1 : 0));
+      const currentRangeSelectDirection: RangeSelectDirection =
+        this.rangeSelectDirection === 'ASC'
+          ? currentItemIndex >
+            sortedCurrentSelectedIndex[sortedCurrentSelectedIndex.length - 1]
+            ? 'DESC'
+            : 'ASC'
+          : currentItemIndex > sortedCurrentSelectedIndex[0]
+          ? 'DESC'
+          : 'ASC';
+      const currentItemIsFirstElementSelected =
+        this.indexOf(this.selectedItems[0]) ===
+        this.indexOf(currentSelectedItem);
 
-      const finallyIndex =
-        currentItemIndex > sortedIndex[0]
-          ? sortedIndex.filter((index) => index <= currentItemIndex)
-          : sortedIndex;
-      // si l'index de selectedItem est inférieur aux index déja sélectionné alors je l'ajoute sinon
-      const smallestIndex = finallyIndex[0];
-      const largestIndex = finallyIndex[finallyIndex.length - 1];
+      if (currentItemIsFirstElementSelected) {
+        this.selectedItems = [currentSelectedItem];
+      } else if (currentRangeSelectDirection === 'ASC') {
+        if (this.selectedItems.length === 1) {
+          this.selectRangeAsc(currentSelectedItem);
+        } else {
+          if (this.rangeSelectDirection === 'DESC') {
+            this.selectedItems = [
+              ...this.values.slice(
+                currentItemIndex,
+                this.sortedCurrentSelectedIndex[0]
+              ),
+            ];
+          } else {
+            this.selectRangeAsc(currentSelectedItem);
+          }
+        }
+      } else {
+        // 'DESC'
+        if (selectedItemWithoutCurrent.length === 1) {
+          this.selectRangeDesc(currentSelectedItem);
+        } else {
+          if (this.rangeSelectDirection === 'ASC') {
+            this.selectedItems = [
+              ...this.values.slice(
+                this.sortedCurrentSelectedIndex[this.selectedItems.length - 1],
+                currentItemIndex
+              ),
+            ];
+          } else {
+            this.selectRangeDesc(currentSelectedItem);
+          }
+        }
+      }
+      // const finallyIndex =
+      //   this.rangeSelectDirection === 'ASC'
+      //     ? sortedIndex.filter((index) => index <= currentItemIndex)
+      //     : sortedIndex;
 
-      this.selectedItems = [
-        ...this.values.slice(smallestIndex, largestIndex + 1),
-      ];
+      // const smallestIndex = 50;
+      // const largestIndex = 0;
+
+      // this.selectedItems = [
+      //   ...this.values.slice(smallestIndex, largestIndex + 1),
+      // ];
+
+      this.rangeSelectDirection = currentRangeSelectDirection;
     } else {
-      this.selectedItems = [selectedItem];
+      this.selectedItems = [currentSelectedItem];
     }
+  }
+
+  private selectRangeAsc(currentSelectedItem: T): void {
+    const currentItemIndex = this.indexOf(currentSelectedItem);
+
+    const largestIndex =
+      this.sortedCurrentSelectedIndex[
+        this.sortedCurrentSelectedIndex.length - 1
+      ];
+
+    this.selectedItems = [
+      ...this.values.slice(currentItemIndex, largestIndex + 1),
+    ];
+  }
+
+  private selectRangeDesc(currentSelectedItem: T): void {
+    const currentItemIndex = this.indexOf(currentSelectedItem);
+    this.selectedItems = [
+      ...this.values.slice(
+        this.sortedCurrentSelectedIndex[0],
+        currentItemIndex + 1
+      ),
+    ];
+  }
+
+  private get sortedCurrentSelectedIndex(): number[] {
+    return this.selectedItems
+      .map((item) =>
+        this.values.findIndex((value) => this.checkSelectFnt(value, item))
+      )
+      .sort((a, b) => (a > b ? 1 : a < b ? -1 : 0));
   }
 
   isSelect(currentItem: T): boolean {

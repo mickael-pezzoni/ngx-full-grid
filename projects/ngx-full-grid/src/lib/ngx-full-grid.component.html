@@ -15,13 +15,13 @@
     [matColumnDef]="column.uuid"
   >
     <th
-    mat-header-cell
+      mat-header-cell
       #header
       libResizeColumn
       [id]="column.uuid"
       (resizeStart)="onResize()"
       (resizeEnd)="onStopResize()"
-      [width]="column.width"
+      [width]="column.width ?? 5"
       [table]="matTableElement.nativeElement"
       [resizeColumn]="enableResize"
       *matHeaderCellDef
