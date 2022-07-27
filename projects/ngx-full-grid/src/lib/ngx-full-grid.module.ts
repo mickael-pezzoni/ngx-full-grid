@@ -4,7 +4,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatRippleModule } from '@angular/material/core';
 import { FilterPipe } from './grid-filter/filter.pipe';
@@ -37,7 +36,7 @@ import { CustomColumnComponent } from './custom-column/custom-column.component';
     MatIconModule,
     MatButtonModule,
     DragDropModule,
-    BrowserAnimationsModule,
+    CommonModule,
     MatBadgeModule,
   ],
   exports: [NgxFullGridComponent, CustomColumnComponent],

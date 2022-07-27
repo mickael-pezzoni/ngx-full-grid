@@ -1,4 +1,4 @@
-import { ColumnIdentifier } from './ngx-full-grid.model';
+import { ColumnIdentifier, ColumnWidth } from './ngx-full-grid.model';
 import {
   ChangeDetectorRef,
   Directive,
@@ -7,6 +7,7 @@ import {
   HostBinding,
   HostListener,
   Input,
+  OnInit,
   Output,
   Renderer2,
 } from '@angular/core';
@@ -15,8 +16,8 @@ import { MatTable } from '@angular/material/table';
 @Directive({
   selector: '[libResizeColumn]',
 })
-export class ResizeColumnDirective<T extends object> {
-  @Input('resizeColumn') resizable!: boolean;
+export class ResizeColumnDirective<T extends object> implements OnInit {
+  @Input() resizeColumn!: boolean;
 
   @Input() index!: number;
 
@@ -30,29 +31,29 @@ export class ResizeColumnDirective<T extends object> {
   @HostBinding('style.width.%')
   width?: number;
 
-  startWithNextColumns: { id: string; with: number }[] = [];
+  startWithNextColumns: ColumnWidth[] = [];
 
-  private withLimit = 5;
+  private readonly withLimit = 5;
 
   @Input()
   @HostBinding('attr.id')
   id?: string;
 
-  @Output() resizeStart = new EventEmitter<void>();
-  @Output() resizeEnd = new EventEmitter<number>();
+  @Output() private readonly resizeStart = new EventEmitter<void>();
+  @Output() private readonly resizeEnd = new EventEmitter<number>();
   private resizing = false;
 
   constructor(
-    private renderer: Renderer2,
-    private elementRef: ElementRef<HTMLElement>,
-    private changeDetector: ChangeDetectorRef
+    private readonly renderer: Renderer2,
+    private readonly elementRef: ElementRef<HTMLElement>,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
-    if (this.resizable) {
-      const row = this.renderer.parentNode(this.elementRef.nativeElement);
-      const thead = this.renderer.parentNode(row);
-      this.table = this.renderer.parentNode(thead);
+  ngOnInit(): void {
+    if (this.resizeColumn) {
+      // const row = this.renderer.parentNode(this.elementRef.nativeElement);
+      // const thead = this.renderer.parentNode(row);
+      // this.table = this.renderer.parentNode(thead);
 
       const resizer = this.renderer.createElement('span');
       this.renderer.addClass(resizer, 'resize-holder');
@@ -78,18 +79,17 @@ export class ResizeColumnDirective<T extends object> {
     this.resizeStart.emit();
   };
 
+  // tslint:disable-next-line: no-unsafe-any
   @HostListener('window:mouseup', ['$event']) private onMouseUp(): void {
     if (this.resizing) {
       this.resizing = false;
       this.renderer.removeClass(this.table, 'resizing');
       this.resizeEnd.emit(this.width);
-
     }
   }
 
   getAllNextColumns(element: Element): Element[] {
     const subColumn =
-      element.nextElementSibling !== undefined &&
       element.nextElementSibling !== null
         ? this.getAllNextColumns(element.nextElementSibling)
         : undefined;
@@ -102,16 +102,12 @@ export class ResizeColumnDirective<T extends object> {
   }
 
   onMouseMove = (event: MouseEvent) => {
-    if (this.resizing && event.buttons) {
+    if (this.resizing) {
       this.renderer.addClass(this.table, 'resizing');
 
       const columns = this.getAllNextColumns(
         this.elementRef.nativeElement
       ).filter((column) => column.id !== this.id);
-
-      const totalWidth: number = columns
-        .map((column) => column.clientWidth)
-        .reduce((value, previousValue) => value + previousValue);
 
       const newWidth = this.getPxToPercent(
         this.startWidth + event.clientX - this.startX,

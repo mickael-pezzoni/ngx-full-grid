@@ -11,6 +11,7 @@ import { HttpClientModule } from '@angular/common/http';
     BrowserModule,
     NgxFullGridModule,
     MatCheckboxModule,
+    BrowserAnimationsModule,
     HttpClientModule,
   ],
   providers: [],

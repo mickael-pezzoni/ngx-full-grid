@@ -16,13 +16,15 @@
     (paramsChange)="onParamsChange($event)"
   >
     <lib-custom-column
-    columns
+      columns
       [grid]="grid"
       [property]="'name.first'"
       [headerTemplate]="header"
       [cellTemplate]="firstNameTemplate"
     >
-      <ng-template #header let-column="column"> {{ column.property }} </ng-template>
+      <ng-template #header let-column="column">
+        {{ column.property }}
+      </ng-template>
 
       <ng-template
         #firstNameTemplate
@@ -31,11 +33,10 @@
         let-index="index"
         let-column="column"
       >
-        <!-- <pre>{{ column | json }}</pre> -->
-        <span>{{ value }}</span>
+        {{ column.property }}
       </ng-template>
     </lib-custom-column>
-    <!-- <lib-custom-column
+    <lib-custom-column
       [grid]="grid"
       [property]="'picture.thumbnail'"
       [cellTemplate]="avatarTemplate"
@@ -43,7 +44,7 @@
       <ng-template #avatarTemplate let-value="value" let-column="column">
         <p style="text-align: center"><img [src]="value" /></p>
       </ng-template>
-    </lib-custom-column> -->
+    </lib-custom-column>
   </lib-ngx-full-grid>
 </div>
 <ul>

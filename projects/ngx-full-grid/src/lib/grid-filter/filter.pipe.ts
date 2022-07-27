@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {
-  DotNestedKeys,
+  PropertyOf,
   FilterMode,
   FILTER_MODE,
   ObjectFromKeyOf,
@@ -35,7 +35,7 @@ export class FilterPipe implements PipeTransform {
                 .filter(([key, value]) =>
                   this.filterByObjectProperties(
                     item,
-                    key as DotNestedKeys<T>,
+                    key as PropertyOf<T>,
                     value,
                     searchMode
                   )
@@ -49,7 +49,7 @@ export class FilterPipe implements PipeTransform {
 
   private filterByObjectProperties<T>(
     item: T,
-    key: DotNestedKeys<T>,
+    key: PropertyOf<T>,
     filterValue: unknown,
     filterMode: FilterMode
   ): boolean {
@@ -58,10 +58,14 @@ export class FilterPipe implements PipeTransform {
       keys.includes(key)
     )?.[1];
 
-    if (typeof valueForKey === 'object') {
+    if (
+      typeof valueForKey === 'object' &&
+      valueForKey !== undefined &&
+      valueForKey !== null
+    ) {
       return this.filterByObjectProperties(
         valueForKey,
-        keys.join('.') as DotNestedKeys<T>,
+        keys.join('.') as PropertyOf<T>,
         filterValue,
         filterMode
       );

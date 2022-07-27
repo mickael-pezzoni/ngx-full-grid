@@ -1,11 +1,9 @@
 type DotPrefix<T extends string> = T extends '' ? '' : `.${T}`;
 
-export type DotNestedKeys<T> = (
+export type PropertyOf<T> = (
   T extends object
     ? {
-        [K in Exclude<keyof T, symbol>]: `${K}${DotPrefix<
-          DotNestedKeys<T[K]>
-        >}`;
+        [K in Exclude<keyof T, symbol>]: `${K}${DotPrefix<PropertyOf<T[K]>>}`;
       }[Exclude<keyof T, symbol>]
     : ''
 ) extends infer D
@@ -14,7 +12,7 @@ export type DotNestedKeys<T> = (
 
 export interface Column<T extends object> {
   name: string;
-  property: DotNestedKeys<T>;
+  property: PropertyOf<T>;
   sort?: GridSort<T>;
   index?: number;
   visible: boolean;
@@ -60,3 +58,8 @@ export type GridParams<T> = {
   sorts: GridSortParam<T>[];
   columns: string[];
 } & FilterEntity<T>;
+
+export interface ColumnWidth {
+  id: string;
+  with: number;
+}

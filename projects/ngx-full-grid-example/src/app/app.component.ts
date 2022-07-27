@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {
   Column,
-  DotNestedKeys,
+  PropertyOf,
 } from 'projects/ngx-full-grid/src/lib/ngx-full-grid.model';
 import {
   BehaviorSubject,
@@ -110,10 +110,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this.data = res.results;
       this.selectedItems = [res.results[0]];
       this.changeDetector.detectChanges();
-
     });
   }
-
 
   isSelect(currentItem: FakeUsers, selectedItem: FakeUsers): boolean {
     return currentItem.login.uuid === selectedItem.login.uuid;
@@ -143,7 +141,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   onStateChange(event: GridState<FakeUsers>): void {
     console.log('STATE');
-
   }
 
   addData(): void {
