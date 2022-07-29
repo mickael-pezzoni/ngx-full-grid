@@ -63,7 +63,7 @@
   <tr
     mat-row
     (click)="onRowSelect(row)"
-    [class]="isSelect(row) ? selectedClass : ''"
+    [class]="isSelect(row) || selectAllRow ? selectedClass : ''"
     *matRowDef="let row; columns: visibleColumnsUuid"
   ></tr>
 

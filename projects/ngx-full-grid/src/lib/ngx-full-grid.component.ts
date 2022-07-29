@@ -56,6 +56,8 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() enableResize = false;
   @Input() selectedClass = 'item-selected';
   @Input() backendFilter = false;
+  @Input() selectAllRow = false;
+
   @Input() filterMode?: FilterMode;
   @Input() checkSelectFnt!: (currentItem: T, selectedItem: T) => boolean;
   @Input() set selectedItems(selectedItems: T[]) {
