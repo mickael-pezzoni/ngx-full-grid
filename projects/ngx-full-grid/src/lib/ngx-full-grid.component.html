@@ -20,7 +20,7 @@
       [minWith]="minWith"
       (resizeStart)="onResize()"
       (resizeEnd)="onStopResize()"
-      [width]="column.width ?? minWith"
+      [width]="column.width"
       [table]="matTableElement.nativeElement"
       [resizeColumn]="enableResize"
       *matHeaderCellDef
