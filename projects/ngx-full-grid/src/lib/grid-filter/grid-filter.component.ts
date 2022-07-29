@@ -18,4 +18,11 @@ export class GridFilterComponent<T extends object> implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.filterChange.emit(value);
   }
+
+  cleanFilter(input: HTMLInputElement): void {
+    const inputElement = input;
+    inputElement.value = '';
+
+    this.filterChange.emit('');
+  }
 }

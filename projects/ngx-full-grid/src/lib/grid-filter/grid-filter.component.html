@@ -1,9 +1,21 @@
-<mat-form-field class="search-field" appearance="fill">
+<mat-form-field class="search-field" color="accent" appearance="outline">
   <input
     tabindex="1"
     (input)="onFilterChange($event)"
     type="text"
+    #input
     matInput
     [placeholder]="column.name"
   />
+  <button
+    *ngIf="input.value !== ''"
+    type="button"
+    mat-icon-button
+    matSuffix
+    (click)="cleanFilter(input)"
+    i18n-aria-label
+    aria-label="Toggle password visibility"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
 </mat-form-field>

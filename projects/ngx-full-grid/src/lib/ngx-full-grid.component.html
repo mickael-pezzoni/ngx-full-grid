@@ -17,9 +17,10 @@
       #header
       libResizeColumn
       [id]="column.uuid"
+      [minWith]="minWith"
       (resizeStart)="onResize()"
       (resizeEnd)="onStopResize()"
-      [width]="column.width ?? 5"
+      [width]="column.width ?? minWith"
       [table]="matTableElement.nativeElement"
       [resizeColumn]="enableResize"
       *matHeaderCellDef

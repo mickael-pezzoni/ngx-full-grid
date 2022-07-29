@@ -33,7 +33,7 @@ export class ResizeColumnDirective<T extends object> implements OnInit {
 
   startWithNextColumns: ColumnWidth[] = [];
 
-  private readonly withLimit = 5;
+  @Input() minWith!: number;
 
   @Input()
   @HostBinding('attr.id')
@@ -114,7 +114,7 @@ export class ResizeColumnDirective<T extends object> implements OnInit {
         this.table.clientWidth
       );
 
-      this.width = newWidth < this.withLimit ? this.withLimit : newWidth;
+      this.width = newWidth < this.minWith ? this.minWith : newWidth;
       columns.forEach((col) => {
         const nextWithCol =
           (this.startWithNextColumns.find((original) => original.id === col.id)
@@ -129,7 +129,7 @@ export class ResizeColumnDirective<T extends object> implements OnInit {
         this.renderer.setStyle(
           col,
           'width',
-          `${newColumnWith < this.withLimit ? this.withLimit : newColumnWith}%`
+          `${newColumnWith < this.minWith ? this.minWith : newColumnWith}%`
         );
       });
 

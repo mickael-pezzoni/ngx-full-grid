@@ -110,6 +110,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private _state!: GridStateApplied<T>;
   private ctrlIsPressed = false;
   private shiftIsPressed = false;
+  minWith = 10;
   resize = false;
   rangeSelectDirection?: RangeSelectDirection;
 
