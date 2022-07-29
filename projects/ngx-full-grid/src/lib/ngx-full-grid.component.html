@@ -49,7 +49,7 @@
       <ng-container
         [ngTemplateOutlet]="getCellTemplate(column.property)"
         [ngTemplateOutletContext]="{
-          value: getValueFromProperty(element, column.property),
+          value: element | valueFromProperty: column.property,
           item: element,
           index: indexOf(element),
           column: column
@@ -60,12 +60,16 @@
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="visibleColumnsUuid"></tr>
-  <tr
-    mat-row
-    (click)="onRowSelect(row)"
-    [class]="isSelect(row) || selectAllRow ? selectedClass : ''"
-    *matRowDef="let row; columns: visibleColumnsUuid"
-  ></tr>
+  <ng-container *ngIf="rowIdProperty; else originalRowTemplate">
+    <tr mat-row [id]="prefixRowIdProperty + (row | valueFromProperty: rowIdProperty)" (click)="onRowSelect(row)"
+      [class]="isSelect(row) || selectAllRow ? selectedClass : ''" *matRowDef="let row; columns: visibleColumnsUuid">
+    </tr>
+  </ng-container>
+  <ng-template #originalRowTemplate>
+    <tr mat-row (click)="onRowSelect(row)" [class]="isSelect(row) || selectAllRow ? selectedClass : ''"
+      *matRowDef="let row; columns: visibleColumnsUuid"></tr>
+  </ng-template>
+
 
   <!-- Row shown when there is no matching data. -->
   <!-- <tr class="mat-row" *matNoDataRow>

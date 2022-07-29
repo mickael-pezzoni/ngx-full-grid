@@ -1,3 +1,4 @@
+import { ValueFromPropertyPipe } from './value-from-property.pipe';
 import { NgModule } from '@angular/core';
 import { NgxFullGridComponent } from './ngx-full-grid.component';
 import { MatTableModule } from '@angular/material/table';
@@ -24,6 +25,7 @@ import { CustomColumnComponent } from './custom-column/custom-column.component';
     ResizeColumnDirective,
     GridFilterComponent,
     CustomColumnComponent,
+    ValueFromPropertyPipe,
   ],
   imports: [
     MatTableModule,

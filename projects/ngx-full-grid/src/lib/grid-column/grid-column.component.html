@@ -1,33 +1,23 @@
-<div class="header" matRipple>
-  <button
-    class="sorting-button"
-    [disableRipple]="true"
-    *ngIf="enableSorting; else notSortTemplate"
-    mat-button
-    (click)="onSortChange()"
-  >
+<div class="header" (click)="onSortChange()" matRipple>
+  <div class="column-name">
     <ng-container *ngIf="template !== undefined; else originalColumnTemplate">
-      <ng-container
-        *ngTemplateOutlet="template; context: { column: column }"
-      ></ng-container>
+      <ng-container *ngTemplateOutlet="template; context: { column: column }"></ng-container>
     </ng-container>
     <ng-template #originalColumnTemplate>
       {{ column.name }}
     </ng-template>
 
-    <ng-container *ngIf="column.sort !== undefined">
-      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortDesc"
-        >expand_more</mat-icon
-      >
-      <mat-icon [matBadge]="column.sort.index" *ngIf="isSortAsc"
-        >expand_less</mat-icon
-      >
-    </ng-container>
-  </button>
-  <ng-template #notSortTemplate>
-    <div>
-      <p>{{ column.name }}</p>
+    <ng-template #notSortTemplate>
+      {{ column.name }}
+    </ng-template>
+  </div>
+  <div class="sort" *ngIf="column.sort !== undefined && enableSorting">
+    <div class="sort-icon">
+      <mat-icon *ngIf="isSortDesc">expand_more</mat-icon>
+      <mat-icon *ngIf="isSortAsc">expand_less</mat-icon>
     </div>
-  </ng-template>
+    <div [matBadge]="column.sort.index"></div>
+  </div>
+
   <!-- <div *ngIf="column.index !== 0 && enableResize" (mousedown)="onMouseDown($event)" class="resizable-control"></div> -->
 </div>
