@@ -29,6 +29,7 @@ import {
   OnInit,
   Output,
   QueryList,
+  Renderer2,
   SimpleChanges,
   TemplateRef,
   ViewChild,
@@ -57,9 +58,11 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() selectedClass = 'item-selected';
   @Input() backendFilter = false;
   @Input() selectAllRow = false;
-
   @Input() filterMode?: FilterMode;
   @Input() checkSelectFnt!: (currentItem: T, selectedItem: T) => boolean;
+  @Input() prefixRowIdProperty = 'item';
+  @Input() rowIdProperty?: PropertyOf<T>;
+  // tslint:disable-next-line: no-unsafe-any
   @Input() set selectedItems(selectedItems: T[]) {
     this._selectedItems = selectedItems;
   }
@@ -71,13 +74,13 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   set state(state: GridState<T>) {
     this._state = {
       ...state,
-      columns: state.columns
-        .map((column, index) => ({
+      columns: this.sortColumns(
+        state.columns.map((column, index) => ({
           ...column,
           uuid: v4(),
           index: column.index ?? index,
         }))
-        .sort((a, b) => a.index - b.index),
+      ),
     };
   }
   get state(): GridState<T> {
@@ -102,6 +105,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Output() private readonly stateChange = new EventEmitter<GridState<T>>();
   @Output() private readonly paramsChange = new EventEmitter<GridParams<T>>();
 
+  minWith = 10;
   filter: FilterEntity<T> = {};
   params: GridParams<T> = {
     columns: [],
@@ -112,11 +116,13 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private _state!: GridStateApplied<T>;
   private ctrlIsPressed = false;
   private shiftIsPressed = false;
-  minWith = 10;
   resize = false;
   rangeSelectDirection?: RangeSelectDirection;
 
-  constructor() {}
+  constructor(
+    private readonly elementRef: ElementRef<HTMLElement>,
+    private readonly renderer2: Renderer2
+  ) {}
 
   ngOnInit(): void {}
 
@@ -132,19 +138,6 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       .map((column) => column.property);
   }
 
-  getValueFromProperty(item: object, property: PropertyOf<T>): unknown {
-    const keys = (property as string).split('.');
-
-    const value = Object.entries(item).find(([key]) => keys[0] === key)?.[1];
-
-    return typeof value === 'object' && value !== null && value !== undefined
-      ? this.getValueFromProperty(
-          value as object,
-          keys.slice(1).join('.') as PropertyOf<T>
-        )
-      : value;
-  }
-
   hasTemplate(property: PropertyOf<T>): boolean {
     return (
       this.customColumns
@@ -152,6 +145,22 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
         .find((col) => (col.property as string) === (property as string)) !==
       undefined
     );
+  }
+
+  private sortColumns(columns: ColumnIdentifier<T>[]): ColumnIdentifier<T>[] {
+    // https://github.com/cartant/eslint-plugin-etc/blob/main/docs/rules/no-assign-mutated-array.md
+    const sortedColumns = columns
+      .map((column) => ({ ...column }))
+      .sort((a, b) =>
+        (a.index ?? 0) > (b?.index ?? 0)
+          ? 1
+          : (a.index ?? 0) < (b.index ?? 0)
+          ? -1
+          : 0
+      )
+      .slice();
+
+    return sortedColumns;
   }
 
   getCellTemplate(property: PropertyOf<T>): TemplateRef<unknown> {
@@ -315,12 +324,12 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private cleanSort(): void {
     this._state = {
       ...this.stateApplied,
-      columns: [
+      columns: this.sortColumns([
         ...this.stateApplied.columns.map((column) => ({
           ...column,
           sort: undefined,
         })),
-      ],
+      ]),
     };
   }
 
@@ -357,6 +366,23 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   trackByFnt(index: number): number {
     return index;
+  }
+
+  focusOnSelectedRow(valuePropertyId?: string): void {
+    const row =
+      this.rowIdProperty !== undefined
+        ? (this.renderer2.selectRootElement(
+            `#${this.prefixRowIdProperty}${valuePropertyId}`,
+            true
+          ) as HTMLElement | undefined)
+        : Array.from(
+            this.elementRef.nativeElement.getElementsByClassName(
+              this.selectedClass
+            )
+          ).map((elt) => elt as HTMLElement)[0];
+
+    row?.focus();
+    row?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
@@ -451,7 +477,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
       this._state = {
         ...this.stateApplied,
-        columns: [
+        columns: this.sortColumns([
           ...remainingColumns,
           ...columnsHigherSortIndex.map((column) => ({
             ...column,
@@ -463,27 +489,25 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
                   }
                 : undefined,
           })),
-        ],
+        ]),
       };
 
       this.updateSortColum(sortedColumn, undefined);
     }
+
     this.emitState();
     this.updateParams();
   }
 
   get gridSortParam(): GridSortParam<T>[] {
-    return this.stateApplied.columns
-      .filter((column) => column.sort !== undefined)
-      .sort(
-        (a, b) => (a.sort as GridSort<T>).index - (b.sort as GridSort<T>).index
-      )
-      .map(
-        (column) =>
-          `${String(column.property)}|${
-            (column.sort as GridSort<T>).direction
-          }` as GridSortParam<T>
-      );
+    return this.sortColumns(
+      this.stateApplied.columns.filter((column) => column.sort !== undefined)
+    ).map(
+      (column) =>
+        `${String(column.property)}|${
+          (column.sort as GridSort<T>).direction
+        }` as GridSortParam<T>
+    );
   }
 
   private updateSortColum(
@@ -492,19 +516,23 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   ): void {
     this._state = {
       ...this.stateApplied,
-      columns: this.stateApplied.columns.map((column) => {
-        if (!column.visible) {
-          return column;
-        }
-        if ((sortedColumn.property as string) === (column.property as string)) {
-          return {
-            ...column,
-            sort,
-          };
-        }
+      columns: this.sortColumns(
+        this.stateApplied.columns.map((column) => {
+          if (!column.visible) {
+            return column;
+          }
+          if (
+            (sortedColumn.property as string) === (column.property as string)
+          ) {
+            return {
+              ...column,
+              sort,
+            };
+          }
 
-        return column;
-      }),
+          return column;
+        })
+      ),
     };
   }
 }
