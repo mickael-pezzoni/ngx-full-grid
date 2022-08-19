@@ -4,12 +4,11 @@
       <ng-container *ngTemplateOutlet="template; context: { column: column }"></ng-container>
     </ng-container>
     <ng-template #originalColumnTemplate>
-      {{ column.name }}
+      <span [matTooltip]="column.name">
+        {{ column.name }}
+      </span>
     </ng-template>
 
-    <ng-template #notSortTemplate>
-      {{ column.name }}
-    </ng-template>
   </div>
   <div class="sort" *ngIf="column.sort !== undefined && enableSorting">
     <div class="sort-icon">

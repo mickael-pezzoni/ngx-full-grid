@@ -66,8 +66,7 @@
       (click)="onRowSelect(row)"
       [ngClass]="[isSelect(row) || selectAllRow ? selectedClass : '', rowClass]"
       *matRowDef="let row; columns: visibleColumnsUuid"
-    >
-    </tr>
+    ></tr>
   </ng-container>
   <ng-template #originalRowTemplate>
     <tr
@@ -86,6 +85,8 @@
   let-value="value"
   let-column="column"
 >
-  {{ value }}
+  <span [matTooltip]="value">
+    {{ value }}
+  </span>
 </ng-template>
 <ng-content select="[columns]"></ng-content>

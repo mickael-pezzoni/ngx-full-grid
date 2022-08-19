@@ -17,6 +17,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ResizeColumnDirective } from './resize-column.directive';
 import { GridFilterComponent } from './grid-filter/grid-filter.component';
 import { CustomColumnComponent } from './custom-column/custom-column.component';
+import {MatTooltipModule} from '@angular/material/tooltip';
+
 @NgModule({
   declarations: [
     NgxFullGridComponent,
@@ -37,6 +39,7 @@ import { CustomColumnComponent } from './custom-column/custom-column.component';
     MatSortModule,
     MatIconModule,
     MatButtonModule,
+    MatTooltipModule,
     DragDropModule,
     CommonModule,
     MatBadgeModule,
