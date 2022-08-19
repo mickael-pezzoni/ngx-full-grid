@@ -1,4 +1,3 @@
-import { ColumnIdentifier, ColumnWidth } from './ngx-full-grid.model';
 import {
   ChangeDetectorRef,
   Directive,
@@ -11,7 +10,8 @@ import {
   Output,
   Renderer2,
 } from '@angular/core';
-import { MatTable } from '@angular/material/table';
+
+import { ColumnWidth } from './ngx-full-grid.model';
 
 @Directive({
   selector: '[libResizeColumn]',
@@ -46,19 +46,19 @@ export class ResizeColumnDirective<T extends object> implements OnInit {
   constructor(
     private readonly renderer: Renderer2,
     private readonly elementRef: ElementRef<HTMLElement>,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     if (this.resizeColumn) {
-      // const row = this.renderer.parentNode(this.elementRef.nativeElement);
-      // const thead = this.renderer.parentNode(row);
-      // this.table = this.renderer.parentNode(thead);
-
       const resizer = this.renderer.createElement('span');
       this.renderer.addClass(resizer, 'resize-holder');
       this.renderer.appendChild(this.elementRef.nativeElement, resizer);
       this.renderer.listen(resizer, 'mousedown', this.onMouseDown);
+
+      this.renderer.listen(resizer, 'touchstart', this.onMouseDown);
+      this.renderer.listen(resizer, 'touchmove', this.onMouseMove);
+
       this.renderer.listen(this.table, 'mousemove', this.onMouseMove);
     }
   }
@@ -66,21 +66,21 @@ export class ResizeColumnDirective<T extends object> implements OnInit {
   onMouseDown = (event: MouseEvent) => {
     this.resizing = true;
 
-    const { width, right } =
-      this.elementRef.nativeElement.getBoundingClientRect();
+    const { width, right } = this.elementRef.nativeElement.getBoundingClientRect();
     this.startX = right;
     this.startWidth = width;
 
-    this.startWithNextColumns = this.getAllNextColumns(
-      this.elementRef.nativeElement
-    )
+    this.startWithNextColumns = this.getAllNextColumns(this.elementRef.nativeElement)
       .filter((col) => col.id !== this.id)
       .map((col) => ({ id: col.id, with: col.getBoundingClientRect().width }));
     this.resizeStart.emit();
   };
 
   // tslint:disable-next-line: no-unsafe-any
-  @HostListener('window:mouseup', ['$event']) private onMouseUp(): void {
+  @HostListener('touchend')
+  // tslint:disable-next-line: no-unsafe-any
+  @HostListener('window:mouseup', ['$event'])
+  private onMouseUp(): void {
     if (this.resizing) {
       this.resizing = false;
       this.renderer.removeClass(this.table, 'resizing');
@@ -101,35 +101,33 @@ export class ResizeColumnDirective<T extends object> implements OnInit {
     return columns;
   }
 
-  onMouseMove = (event: MouseEvent) => {
+  onMouseMove = (event: MouseEvent | TouchEvent) => {
     if (this.resizing) {
+      const clientX = 'clientX' in event ? event.clientX : event.touches[0].clientX;
+
       this.renderer.addClass(this.table, 'resizing');
 
-      const columns = this.getAllNextColumns(
-        this.elementRef.nativeElement
-      ).filter((column) => column.id !== this.id);
+      const columns = this.getAllNextColumns(this.elementRef.nativeElement).filter(
+        (column) => column.id !== this.id,
+      );
 
       const newWidth = this.getPxToPercent(
-        this.startWidth + event.clientX - this.startX,
-        this.table.clientWidth
+        this.startWidth + clientX - this.startX,
+        this.table.clientWidth,
       );
 
       this.width = newWidth < this.minWith ? this.minWith : newWidth;
       columns.forEach((col) => {
         const nextWithCol =
-          (this.startWithNextColumns.find((original) => original.id === col.id)
-            ?.with ?? 0) -
-          (event.clientX - this.startX) / columns.length;
+          (this.startWithNextColumns.find((original) => original.id === col.id)?.with ?? 0) -
+          (clientX - this.startX) / columns.length;
 
-        const newColumnWith = this.getPxToPercent(
-          nextWithCol,
-          this.table.clientWidth
-        );
+        const newColumnWith = this.getPxToPercent(nextWithCol, this.table.clientWidth);
 
         this.renderer.setStyle(
           col,
           'width',
-          `${newColumnWith < this.minWith ? this.minWith : newColumnWith}%`
+          `${newColumnWith < this.minWith ? this.minWith : newColumnWith}%`,
         );
       });
 
