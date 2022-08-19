@@ -16,27 +16,6 @@
     (paramsChange)="onParamsChange($event)"
   >
     <lib-custom-column
-      columns
-      [grid]="grid"
-      [property]="'name.first'"
-      [headerTemplate]="header"
-      [cellTemplate]="firstNameTemplate"
-    >
-      <ng-template #header let-column="column">
-        {{ column.property }}
-      </ng-template>
-
-      <ng-template
-        #firstNameTemplate
-        let-value="value"
-        let-item="item"
-        let-index="index"
-        let-column="column"
-      >
-        {{ column.property }}
-      </ng-template>
-    </lib-custom-column>
-    <lib-custom-column
       [grid]="grid"
       [property]="'picture.thumbnail'"
       [cellTemplate]="avatarTemplate"

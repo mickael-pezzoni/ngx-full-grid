@@ -73,7 +73,7 @@ export type GridSortParam<T> = keyof T extends string
   : '';
 
 export type GridParams<T> = {
-  sorts: GridSortParam<T>[];
+  sort: GridSortParam<T>[];
   columns: string[];
 } & FilterEntity<T>;
 

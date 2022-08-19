@@ -1,47 +1,35 @@
-import { CustomColumnComponent } from './custom-column/custom-column.component';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
-  Column,
-  PropertyOf,
-  ColumnIdentifier,
-  ObjectFromKeyOf,
-  FilterEntity,
-  SortDirection,
-  GridState,
-  GridSort,
-  GridStateApplied,
-  FilterMode,
-  GridSortParam,
-  GridParams,
-  RangeSelectDirection,
-} from './ngx-full-grid.model';
-import {
-  AfterContentInit,
-  AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   EventEmitter,
   HostListener,
   Input,
-  OnChanges,
   OnInit,
   Output,
   QueryList,
   Renderer2,
-  SimpleChanges,
   TemplateRef,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
 import { v4 } from 'uuid';
+
+import { CustomColumnComponent } from './custom-column/custom-column.component';
 import {
-  CdkDragDrop,
-  CdkDragStart,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
+  ColumnIdentifier,
+  FilterEntity,
+  FilterMode,
+  GridParams,
+  GridSort,
+  GridSortParam,
+  GridState,
+  GridStateApplied,
+  PropertyOf,
+  RangeSelectDirection,
+} from './ngx-full-grid.model';
 
 @Component({
   selector: 'lib-ngx-full-grid',
@@ -55,7 +43,9 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   @Input() enableSorting = false;
   @Input() enableReorder = false;
   @Input() enableResize = false;
+  @Input() enableSelectRow = true;
   @Input() selectedClass = 'item-selected';
+  @Input() rowClass = 'row-item';
   @Input() backendFilter = false;
   @Input() selectAllRow = false;
   @Input() filterMode?: FilterMode;
@@ -79,7 +69,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
           ...column,
           uuid: v4(),
           index: column.index ?? index,
-        }))
+        })),
       ),
     };
   }
@@ -96,9 +86,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   headers!: QueryList<ElementRef<HTMLElement>>;
   @ViewChild('originalCellTemplate', { static: true })
   originalCellTemplate!: TemplateRef<unknown>;
-  @ContentChildren(CustomColumnComponent) customColumns!: QueryList<
-    CustomColumnComponent<T>
-  >;
+  @ContentChildren(CustomColumnComponent) customColumns!: QueryList<CustomColumnComponent<T>>;
 
   @Output() private readonly filterChange = new EventEmitter<FilterEntity<T>>();
   @Output() private readonly selectedItemsChange = new EventEmitter<T[]>();
@@ -109,7 +97,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   filter: FilterEntity<T> = {};
   params: GridParams<T> = {
     columns: [],
-    sorts: [],
+    sort: [],
     ...this.filter,
   };
   _selectedItems: T[] = [];
@@ -121,7 +109,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   constructor(
     private readonly elementRef: ElementRef<HTMLElement>,
-    private readonly renderer2: Renderer2
+    private readonly renderer2: Renderer2,
   ) {}
 
   ngOnInit(): void {}
@@ -142,8 +130,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     return (
       this.customColumns
         .toArray()
-        .find((col) => (col.property as string) === (property as string)) !==
-      undefined
+        .find((col) => (col.property as string) === (property as string)) !== undefined
     );
   }
 
@@ -152,11 +139,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     const sortedColumns = columns
       .map((column) => ({ ...column }))
       .sort((a, b) =>
-        (a.index ?? 0) > (b?.index ?? 0)
-          ? 1
-          : (a.index ?? 0) < (b.index ?? 0)
-          ? -1
-          : 0
+        (a.index ?? 0) > (b?.index ?? 0) ? 1 : (a.index ?? 0) < (b.index ?? 0) ? -1 : 0,
       )
       .slice();
 
@@ -165,62 +148,51 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   getCellTemplate(property: PropertyOf<T>): TemplateRef<unknown> {
     return (
-      this.customColumns
-        .toArray()
-        .find((col) => (col.property as string) === (property as string))
+      this.customColumns.toArray().find((col) => (col.property as string) === (property as string))
         ?.cellTemplate ?? this.originalCellTemplate
     );
   }
   getHeaderTemplate(property: PropertyOf<T>): TemplateRef<unknown> | undefined {
     return this.customColumns
       .toArray()
-      .find((col) => (col.property as string) === (property as string))
-      ?.headerTemplate;
+      .find((col) => (col.property as string) === (property as string))?.headerTemplate;
   }
 
   // tslint:disable-next-line: no-unsafe-any
-  @HostListener('document:keydown', ['$event']) private onKeyPressed(
-    event: KeyboardEvent
-  ): void {
+  @HostListener('document:keydown', ['$event']) private onKeyPressed(event: KeyboardEvent): void {
     this.ctrlIsPressed = event.key === 'Control';
     this.shiftIsPressed = event.key === 'Shift';
   }
 
   // tslint:disable-next-line: no-unsafe-any
-  @HostListener('document:keyup', ['$event']) private onKeyUnpressed(
-    event: KeyboardEvent
-  ): void {
+  @HostListener('document:keyup', ['$event']) private onKeyUnpressed(event: KeyboardEvent): void {
     this.ctrlIsPressed = event.key === 'Control' ? false : this.ctrlIsPressed;
     this.shiftIsPressed = event.key === 'Shift' ? false : this.shiftIsPressed;
   }
 
   onRowSelect(selectedItem: T): void {
-    const iSAlreadySelected = this.isSelect(selectedItem);
-    if (this.ctrlIsPressed) {
-      this.selectedItems = iSAlreadySelected
-        ? [
-            ...this.selectedItems.filter(
-              (item) => !this.checkSelectFnt(item, selectedItem)
-            ),
-          ]
-        : [...this.selectedItems, selectedItem];
-    } else if (this.shiftIsPressed) {
-      this.selectRange(selectedItem);
-    } else if (iSAlreadySelected) {
-      this.rangeSelectDirection = undefined;
-      this.selectedItems = this.selectedItems.length > 1 ? [selectedItem] : [];
-    } else {
-      this.rangeSelectDirection = undefined;
-      this.selectedItems = [selectedItem];
-    }
+    if (this.enableSelectRow) {
+      const iSAlreadySelected = this.isSelect(selectedItem);
+      if (this.ctrlIsPressed) {
+        this.selectedItems = iSAlreadySelected
+          ? [...this.selectedItems.filter((item) => !this.checkSelectFnt(item, selectedItem))]
+          : [...this.selectedItems, selectedItem];
+      } else if (this.shiftIsPressed) {
+        this.selectRange(selectedItem);
+      } else if (iSAlreadySelected) {
+        this.rangeSelectDirection = undefined;
+        this.selectedItems = this.selectedItems.length > 1 ? [selectedItem] : [];
+      } else {
+        this.rangeSelectDirection = undefined;
+        this.selectedItems = [selectedItem];
+      }
 
-    this.selectedItemsChange.emit(this.selectedItems);
+      this.selectedItemsChange.emit(this.selectedItems);
+    }
   }
 
   indexOf(itemToCompare: T): number {
-    return this.values.findIndex((item) =>
-      this.checkSelectFnt(item, itemToCompare)
-    );
+    return this.values.findIndex((item) => this.checkSelectFnt(item, itemToCompare));
   }
 
   private selectRange(currentSelectedItem: T): void {
@@ -231,16 +203,14 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
       const currentRangeSelectDirection: RangeSelectDirection =
         this.rangeSelectDirection === 'ASC'
-          ? currentItemIndex >
-            sortedCurrentSelectedIndex[sortedCurrentSelectedIndex.length - 1]
+          ? currentItemIndex > sortedCurrentSelectedIndex[sortedCurrentSelectedIndex.length - 1]
             ? 'DESC'
             : 'ASC'
           : currentItemIndex > sortedCurrentSelectedIndex[0]
           ? 'DESC'
           : 'ASC';
       const currentItemIsFirstElementSelected =
-        this.indexOf(this.selectedItems[0]) ===
-        this.indexOf(currentSelectedItem);
+        this.indexOf(this.selectedItems[0]) === this.indexOf(currentSelectedItem);
 
       if (currentItemIsFirstElementSelected) {
         this.selectedItems = [currentSelectedItem];
@@ -262,18 +232,12 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
     if (this.rangeSelectDirection === 'DESC') {
       this.selectedItems = [
-        ...this.values.slice(
-          currentItemIndex,
-          sortedCurrentSelectedIndex[0] + 1
-        ),
+        ...this.values.slice(currentItemIndex, sortedCurrentSelectedIndex[0] + 1),
       ];
     } else {
-      const largestIndex =
-        sortedCurrentSelectedIndex[sortedCurrentSelectedIndex.length - 1];
+      const largestIndex = sortedCurrentSelectedIndex[sortedCurrentSelectedIndex.length - 1];
 
-      this.selectedItems = [
-        ...this.values.slice(currentItemIndex, largestIndex + 1),
-      ];
+      this.selectedItems = [...this.values.slice(currentItemIndex, largestIndex + 1)];
     }
   }
 
@@ -285,31 +249,28 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       this.selectedItems = [
         ...this.values.slice(
           sortedCurrentSelectedIndex[this.selectedItems.length - 1],
-          currentItemIndex + 1
+          currentItemIndex + 1,
         ),
       ];
     } else {
       this.selectedItems = [
-        ...this.values.slice(
-          sortedCurrentSelectedIndex[0],
-          currentItemIndex + 1
-        ),
+        ...this.values.slice(sortedCurrentSelectedIndex[0], currentItemIndex + 1),
       ];
     }
   }
 
   private get sortedCurrentSelectedIndex(): number[] {
     return this.selectedItems
-      .map((item) =>
-        this.values.findIndex((value) => this.checkSelectFnt(value, item))
-      )
+      .map((item) => this.values.findIndex((value) => this.checkSelectFnt(value, item)))
       .sort((a, b) => (a > b ? 1 : a < b ? -1 : 0));
   }
 
   isSelect(currentItem: T): boolean {
-    return this.selectedItems.some((item) =>
-      this.checkSelectFnt(currentItem, item)
-    );
+    return this.selectedItems.some((item) => this.checkSelectFnt(currentItem, item));
+  }
+
+  cleanFilter(): void {
+    this.filter = {};
   }
 
   onFilterChange(value: string, column: ColumnIdentifier<T>): void {
@@ -339,23 +300,17 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   onStopResize(): void {
     this.resize = false;
-    const columnsElement = this.headers
-      .toArray()
-      .map((col) => col.nativeElement);
+    const columnsElement = this.headers.toArray().map((col) => col.nativeElement);
 
-    const columns: ColumnIdentifier<T>[] = this.stateApplied.columns.map(
-      (column) => {
-        const columnElement = columnsElement.find(
-          (elt) => elt.id === column.uuid
-        );
-        const width = columnElement?.style.width.replace('%', '');
+    const columns: ColumnIdentifier<T>[] = this.stateApplied.columns.map((column) => {
+      const columnElement = columnsElement.find((elt) => elt.id === column.uuid);
+      const width = columnElement?.style.width.replace('%', '');
 
-        return {
-          ...column,
-          width: width !== undefined ? parseInt(width, 10) : column.width,
-        };
-      }
-    );
+      return {
+        ...column,
+        width: width !== undefined ? parseInt(width, 10) : column.width,
+      };
+    });
 
     this._state = {
       ...this.stateApplied,
@@ -373,13 +328,11 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
       this.rowIdProperty !== undefined
         ? (this.renderer2.selectRootElement(
             `#${this.prefixRowIdProperty}${valuePropertyId}`,
-            true
+            true,
           ) as HTMLElement | undefined)
-        : Array.from(
-            this.elementRef.nativeElement.getElementsByClassName(
-              this.selectedClass
-            )
-          ).map((elt) => elt as HTMLElement)[0];
+        : Array.from(this.elementRef.nativeElement.getElementsByClassName(this.selectedClass)).map(
+            (elt) => elt as HTMLElement,
+          )[0];
 
     row?.focus();
     row?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -387,9 +340,9 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   onDropColumn(event: CdkDragDrop<ColumnIdentifier<T>[]>): void {
     const droppedColumn = event.item.data as ColumnIdentifier<T>;
-    const columnTarget = this.stateApplied.columns.filter(
-      (column) => column.visible
-    )[event.currentIndex];
+    const columnTarget = this.stateApplied.columns.filter((column) => column.visible)[
+      event.currentIndex
+    ];
     const updateColumn = this.stateApplied.columns.map((column, index) => {
       if ((columnTarget.property as string) === (column.property as string)) {
         return {
@@ -423,24 +376,19 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
   private updateParams(): void {
     this.params = {
       ...this.filter,
-      sorts: this.gridSortParam,
+      sort: this.gridSortParam,
       columns: this.visibleColumnsProperty,
     };
     this.paramsChange.emit(this.params);
   }
 
-  private calcsSortIndex(
-    sort: GridSort<T>,
-    sortedColumns: ColumnIdentifier<T>
-  ): number {
+  private calcsSortIndex(sort: GridSort<T>, sortedColumns: ColumnIdentifier<T>): number {
     const sortIndex = this.stateApplied.columns
       .map((column) => column.sort?.index ?? 0)
       .sort()
       .reverse()[0];
 
-    const sortHasActive = this.stateApplied.columns.some(
-      (column) => column.sort !== undefined
-    );
+    const sortHasActive = this.stateApplied.columns.some((column) => column.sort !== undefined);
 
     if (sort.index === sortedColumns.sort?.index && sortHasActive) {
       return sort.index;
@@ -453,10 +401,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     return sortIndex;
   }
 
-  onSortChange(
-    sort: GridSort<T> | undefined,
-    sortedColumn: ColumnIdentifier<T>
-  ): void {
+  onSortChange(sort: GridSort<T> | undefined, sortedColumn: ColumnIdentifier<T>): void {
     if (!this.ctrlIsPressed) {
       this.cleanSort();
     }
@@ -468,11 +413,10 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
     if (sort === undefined) {
       const oldIndex = sortedColumn.sort?.index ?? 0;
       const columnsHigherSortIndex = this.stateApplied.columns.filter(
-        (column) => column.sort !== undefined && column.sort.index > oldIndex
+        (column) => column.sort !== undefined && column.sort.index > oldIndex,
       );
       const remainingColumns = this.stateApplied.columns.filter(
-        (column) =>
-          !columnsHigherSortIndex.some((colSup) => column.uuid === colSup.uuid)
+        (column) => !columnsHigherSortIndex.some((colSup) => column.uuid === colSup.uuid),
       );
 
       this._state = {
@@ -501,19 +445,14 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
 
   get gridSortParam(): GridSortParam<T>[] {
     return this.sortColumns(
-      this.stateApplied.columns.filter((column) => column.sort !== undefined)
+      this.stateApplied.columns.filter((column) => column.sort !== undefined),
     ).map(
       (column) =>
-        `${String(column.property)}|${
-          (column.sort as GridSort<T>).direction
-        }` as GridSortParam<T>
+        `${String(column.property)}|${(column.sort as GridSort<T>).direction}` as GridSortParam<T>,
     );
   }
 
-  private updateSortColum(
-    sortedColumn: ColumnIdentifier<T>,
-    sort: GridSort<T> | undefined
-  ): void {
+  private updateSortColum(sortedColumn: ColumnIdentifier<T>, sort: GridSort<T> | undefined): void {
     this._state = {
       ...this.stateApplied,
       columns: this.sortColumns(
@@ -521,9 +460,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
           if (!column.visible) {
             return column;
           }
-          if (
-            (sortedColumn.property as string) === (column.property as string)
-          ) {
+          if ((sortedColumn.property as string) === (column.property as string)) {
             return {
               ...column,
               sort,
@@ -531,7 +468,7 @@ export class NgxFullGridComponent<T extends object> implements OnInit {
           }
 
           return column;
-        })
+        }),
       ),
     };
   }
