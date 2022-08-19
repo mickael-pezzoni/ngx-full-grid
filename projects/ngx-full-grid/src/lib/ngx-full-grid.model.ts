@@ -1,10 +1,13 @@
 type DotPrefix<T extends string> = T extends '' ? '' : `.${T}`;
 
+
 export type PropertyOf<T> = (
   T extends object
-    ? {
-        [K in Exclude<keyof T, symbol>]: `${K}${DotPrefix<PropertyOf<T[K]>>}`;
-      }[Exclude<keyof T, symbol>]
+    ? T extends Date ?
+    ''
+    :{
+      [K in Exclude<keyof T, symbol>]: `${K}${DotPrefix<PropertyOf<T[K]>>}`;
+    }[Exclude<keyof T, symbol>]
     : ''
 ) extends infer D
   ? Extract<D, string>
@@ -21,6 +24,21 @@ export interface Column<T extends object> {
 export type ObjectFromKeyOf<T> = {
   [key in keyof T]?: T[key];
 };
+
+
+interface Test {
+  test: Date;
+  name: string;
+  toto: number;
+  lol: string[];
+  a: {
+    s: string;
+  }
+
+}
+
+
+
 
 export type FilterEntity<T> = ObjectFromKeyOf<T>;
 
